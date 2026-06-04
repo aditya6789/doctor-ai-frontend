@@ -1,10 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import {
   CalendarDays,
   ChevronRight,
-  Heart,
   LayoutDashboard,
   LogOut,
   BarChart3,
@@ -63,13 +63,13 @@ export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: Side
 
       <div className="relative border-b border-white/[0.06] px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-teal-400 via-cyan-400 to-emerald-500 shadow-lg shadow-teal-500/30">
-            <Heart size={18} fill="white" className="text-white" strokeWidth={2.5} />
-          </div>
+          <BrandLogo
+            variant="icon"
+            href="/dashboard"
+            imageClassName="h-10 w-10 rounded-lg bg-white/95 p-1"
+          />
           <div>
-            <p className="text-[15px] font-bold tracking-tight text-white">
-              Doctor<span className="bg-linear-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">AI</span>
-            </p>
+            <p className="text-[15px] font-bold tracking-tight text-white">ClinicSuite</p>
             <p className="mt-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
               <Sparkles size={9} className="text-teal-400/90" />
               Clinic OS

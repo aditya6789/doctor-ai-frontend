@@ -45,7 +45,7 @@ type AutoSettings = {
   style: ResponseStyle;
 };
 
-const AUTO_SETTINGS_KEY = "doctorai_review_auto_settings";
+const AUTO_SETTINGS_KEY = "clinicsuite_review_auto_settings";
 
 const DEFAULT_AUTO_SETTINGS: AutoSettings = {
   fiveStar: true,

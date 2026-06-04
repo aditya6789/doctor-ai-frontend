@@ -343,7 +343,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                   <input
                     value={custEditor.bot_name}
                     onChange={setCust("bot_name")}
-                    placeholder="e.g. MediNova Assistant"
+                    placeholder="e.g. ClinicSuite Assistant"
                     className={inputClass}
                   />
                 </div>

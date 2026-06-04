@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -41,6 +42,7 @@ import {
   Share2,
   Volume2,
 } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -200,10 +202,10 @@ const featureAccent: Record<
 };
 
 const faqs = [
-  { q: "DoctorAI ko setup karne mein kitna time lagta hai?", a: "Almost check-in setups 5 minutes se kam mein live ho jaate hain. Aapko kisi technical coding or developer support ki zaroorat nahi hai." },
-  { q: "Kya hamara purana clinical booking system integration support karega?", a: "Haan. DoctorAI APIs aur hooks ke zariye standard CRM aur EHR softwares se automatically connect ho jaata hai." },
+  { q: "ClinicSuite ko setup karne mein kitna time lagta hai?", a: "Almost check-in setups 5 minutes se kam mein live ho jaate hain. Aapko kisi technical coding or developer support ki zaroorat nahi hai." },
+  { q: "Kya hamara purana clinical booking system integration support karega?", a: "Haan. ClinicSuite APIs aur hooks ke zariye standard CRM aur EHR softwares se automatically connect ho jaata hai." },
   { q: "AI chatbot kaunsi languages ko support karta hai?", a: "Hindi, English, Hinglish aur 10+ regional Indian languages (Bengali, Tamil, Telugu, etc.) support karta hai automatically text language detect karke." },
-  { q: "Kya hamara patient data secure hai?", a: "Absolutes. DoctorAI, HIPAA compliance requirements follow karta hai. Aapka data fully encrypted rehta hai state-of-the-art 256-bit encryption standard ke sath AWS India servers mein." },
+  { q: "Kya hamara patient data secure hai?", a: "Absolutes. ClinicSuite, HIPAA compliance requirements follow karta hai. Aapka data fully encrypted rehta hai state-of-the-art 256-bit encryption standard ke sath AWS India servers mein." },
   { q: "Kya free trial ke liye credit card card detail ki zaroorat hoti hai?", a: "Nahi. 14-day full platform access free trial bilkul free hai without filling credit card card details." },
 ];
 
@@ -285,7 +287,7 @@ function InteractiveHeroMockup() {
           <span className="h-3 w-3 rounded-full bg-amber-400" />
           <span className="h-3 w-3 rounded-full bg-teal-500" />
           <span className="ml-3 rounded-lg border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold text-slate-500">
-            app.doctorai.in/dashboard
+            app.clinicsuite.in/dashboard
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -455,9 +457,21 @@ export function LandingPage() {
   const scrolled = useNavScroll();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuMounted, setMenuMounted] = useState(false);
   const [statsStarted, setStatsStarted] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const statsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMenuMounted(true), []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
 
   // ROI Estimator States
   const [clinicType, setClinicType] = useState<"single" | "multi" | "chain">("multi");
@@ -542,7 +556,7 @@ export function LandingPage() {
               <p className="text-xs text-slate-200">Hi, kya Dr. Arora skin allergy ke liye available hain aaj? Mujhe severe itching ho rahi hai.</p>
             </div>
             <div className="ml-auto max-w-[85%] rounded-2xl bg-teal-950 border border-teal-500/25 px-3 py-2 text-left">
-              <p className="text-[10px] font-bold text-teal-400 mb-0.5">DoctorAI Assistant · 10:14 AM</p>
+              <p className="text-[10px] font-bold text-teal-400 mb-0.5">ClinicSuite Assistant · 10:14 AM</p>
               <p className="text-xs text-teal-100">Namaste! Yes, Dr. Arora (Dermatologist) available hain. Unka clinic consultation fee ₹500 hai. Humare paas aaj do vacant slots hain:</p>
               <div className="mt-2 flex gap-1.5">
                 <span className="rounded bg-teal-800/80 border border-teal-400/30 px-2 py-1 text-[9px] font-bold text-white">4:30 PM today</span>
@@ -554,7 +568,7 @@ export function LandingPage() {
               <p className="text-xs text-slate-200">4:30 PM standard patient slot book kar dijiye checkup ke liye.</p>
             </div>
             <div className="ml-auto max-w-[85%] rounded-2xl bg-teal-950 border border-teal-500/25 px-3 py-2 text-left">
-              <p className="text-[10px] font-bold text-teal-400 mb-0.5">DoctorAI Assistant · 10:15 AM</p>
+              <p className="text-[10px] font-bold text-teal-400 mb-0.5">ClinicSuite Assistant · 10:15 AM</p>
               <p className="text-xs text-teal-100">Great! 4:30 PM slot select ho gaya hai. Aapki appointment confirm karne ke liye please is link pe click karein ya reply confirm karein.</p>
             </div>
           </div>
@@ -594,7 +608,7 @@ export function LandingPage() {
             <div className="relative mx-auto h-[220px] w-[130px] rounded-xl border-4 border-slate-800 bg-slate-950 overflow-hidden flex flex-col justify-between p-2 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent z-10" />
               <div className="relative flex justify-between items-center z-20">
-                <span className="text-[8px] font-bold text-teal-400">DoctorAI Studio</span>
+                <span className="text-[8px] font-bold text-teal-400">ClinicSuite Studio</span>
                 <span className="text-[8px] text-white/50">9:16</span>
               </div>
               {/* Fake Video Backdrop Graphics */}
@@ -652,7 +666,7 @@ export function LandingPage() {
             </p>
             <div className="mt-2 rounded-lg bg-teal-950/60 border border-teal-500/20 p-2.5">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[8px] font-black uppercase tracking-widest text-teal-400">DoctorAI Auto-Reply</span>
+                <span className="text-[8px] font-black uppercase tracking-widest text-teal-400">ClinicSuite Auto-Reply</span>
                 <span className="text-[8px] bg-teal-500 text-slate-950 font-extrabold px-1.5 rounded">Published</span>
               </div>
               <p className="text-[10px] text-teal-200">
@@ -710,7 +724,7 @@ export function LandingPage() {
   ];
 
   return (
-    <main className="landing-page min-h-screen overflow-x-hidden text-slate-600 selection:bg-teal-500/20 selection:text-teal-900">
+    <main className="landing-page min-h-screen overflow-x-clip text-slate-600 selection:bg-teal-500/20 selection:text-teal-900">
       {/* Header & Nav */}
       <header className="sticky top-0 z-50 px-4 pt-4 sm:px-6">
         <div
@@ -721,14 +735,8 @@ export function LandingPage() {
               : "border-transparent bg-transparent"
           )}
         >
-          <a href="/" className="group flex shrink-0 items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/25 ring-1 ring-white/40 transition group-hover:scale-105">
-              <Heart size={16} fill="white" className="text-white" />
-            </div>
-            <span className="text-lg font-extrabold tracking-tight text-slate-900">
-              Doctor<span className="bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">AI</span>
-            </span>
-          </a>
+          <BrandLogo variant="icon" href="/" className="sm:hidden" priority />
+          <BrandLogo variant="full" href="/" className="hidden sm:inline-flex" priority />
 
           <nav className="hidden items-center gap-1 rounded-full border border-slate-200 bg-white/80 p-1 text-sm font-semibold text-slate-600 shadow-sm md:flex">
             {navLinks.map((l) => (
@@ -756,63 +764,94 @@ export function LandingPage() {
 
           <button
             type="button"
-            className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition hover:text-slate-900 md:hidden"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
+            className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:bg-slate-50 md:hidden"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
-            <Menu size={20} />
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </header>
 
-      {/* Mobile Nav Drawer */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            className="fixed inset-0 z-[100] bg-slate-900/30 backdrop-blur-sm md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setMenuOpen(false)}
-          >
-            <motion.div
-              className="absolute right-0 top-0 flex h-full w-[min(100%,300px)] flex-col border-l border-slate-200 bg-white p-5 shadow-2xl"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-6 flex items-center justify-between border-b border-slate-200 pb-4">
-                <span className="text-lg font-extrabold text-slate-900">
-                  Doctor<span className="text-teal-600">AI</span>
-                </span>
-                <button type="button" onClick={() => setMenuOpen(false)} className="rounded-lg p-2 text-slate-500 hover:text-slate-900">
-                  <X size={20} />
-                </button>
-              </div>
-              <nav className="flex flex-col gap-2">
-                {navLinks.map((l) => (
-                  <a
-                    key={l.label}
-                    href={l.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="rounded-xl px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-teal-700"
-                  >
-                    {l.label}
-                  </a>
-                ))}
-                <a
-                  href="/auth"
-                  className="landing-btn-primary btn-shine mt-6 rounded-xl bg-teal-600 py-3 text-center font-bold text-white shadow-lg shadow-teal-500/20"
+      {/* Mobile menu — portaled so overflow-x-hidden on main does not break fixed positioning */}
+      {menuMounted &&
+        createPortal(
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-label="Site navigation"
+                className="fixed inset-0 z-[9999] md:hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.button
+                  type="button"
+                  className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+                  aria-label="Close menu"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   onClick={() => setMenuOpen(false)}
+                />
+
+                <motion.div
+                  className="absolute inset-x-0 top-0 flex max-h-[100dvh] min-h-[100dvh] flex-col bg-white shadow-2xl"
+                  initial={reduceMotion ? false : { y: "-100%" }}
+                  animate={{ y: 0 }}
+                  exit={reduceMotion ? undefined : { y: "-100%" }}
+                  transition={{ type: "spring", damping: 28, stiffness: 320 }}
                 >
-                  Start free trial
-                </a>
-              </nav>
-            </motion.div>
-          </motion.div>
+                  <div className="flex items-center justify-between border-b border-slate-200 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
+                    <BrandLogo variant="full" href="/" imageClassName="h-8" />
+                    <button
+                      type="button"
+                      onClick={() => setMenuOpen(false)}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-700 transition hover:bg-slate-100"
+                      aria-label="Close menu"
+                    >
+                      <X size={22} />
+                    </button>
+                  </div>
+
+                  <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-4">
+                    {navLinks.map((l) => (
+                      <a
+                        key={l.label}
+                        href={l.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="rounded-xl border border-transparent px-4 py-3.5 text-base font-semibold text-slate-800 transition hover:border-slate-200 hover:bg-slate-50 hover:text-teal-700 active:bg-teal-50"
+                      >
+                        {l.label}
+                      </a>
+                    ))}
+                  </nav>
+
+                  <div className="space-y-3 border-t border-slate-200 px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                    <a
+                      href="/auth"
+                      onClick={() => setMenuOpen(false)}
+                      className="block rounded-xl py-3 text-center text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                    >
+                      Sign in
+                    </a>
+                    <a
+                      href="/auth"
+                      onClick={() => setMenuOpen(false)}
+                      className="landing-btn-primary btn-shine block rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-teal-600/20"
+                    >
+                      Start free trial
+                    </a>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden px-4 pb-16 pt-10 sm:px-6 lg:pb-20 lg:pt-16">
@@ -1011,7 +1050,7 @@ export function LandingPage() {
               <div className="mb-5 inline-flex rounded-2xl border border-teal-500/25 bg-teal-500/15 p-3 text-teal-400">
                 <CheckCircle2 size={22} />
               </div>
-              <h3 className="text-xl font-bold">DoctorAI autopilot</h3>
+              <h3 className="text-xl font-bold">ClinicSuite autopilot</h3>
               <p className="mt-2 mb-6 border-b border-teal-200 pb-4 text-sm text-slate-600">
                 Fully automated patient comms, reviews, and content — on one dashboard.
               </p>
@@ -1128,7 +1167,7 @@ export function LandingPage() {
               Calculate your practice benefits
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-slate-600">
-              Select your organization structure to estimate the resources and rating growth DoctorAI delivers.
+              Select your organization structure to estimate the resources and rating growth ClinicSuite delivers.
             </p>
           </div>
 
@@ -1476,7 +1515,7 @@ export function LandingPage() {
                 Start free trial <ArrowRight size={16} />
               </a>
               <a
-                href="mailto:hello@doctorai.in"
+                href="mailto:hello@clinicsuite.in"
                 className="landing-glass inline-flex items-center gap-2 rounded-2xl px-9 py-4 text-sm font-semibold text-slate-700 transition hover:border-teal-300"
               >
                 Talk to sales <ArrowUpRight size={16} className="text-teal-600" />
@@ -1490,14 +1529,7 @@ export function LandingPage() {
       <footer className="border-t border-slate-200 bg-white/80 px-4 py-14 backdrop-blur-sm sm:px-6">
         <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-4 text-left">
           <div className="sm:col-span-2 space-y-3.5">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 shadow-md">
-                <Heart size={14} fill="white" className="text-white" />
-              </div>
-              <span className="text-lg font-extrabold text-slate-900">
-                Doctor<span className="text-teal-600">AI</span>
-              </span>
-            </div>
+            <BrandLogo variant="full" href="/" imageClassName="h-9 sm:h-10" />
             <p className="max-w-xs text-xs leading-relaxed text-slate-500">
               AI-powered practice growth, patient communication, ratings autopilot, and reels marketing studio for modern Indian clinics.
             </p>
@@ -1519,7 +1551,7 @@ export function LandingPage() {
             <ul className="mt-4 space-y-2.5 text-xs text-slate-500">
               <li className="flex items-center gap-2">
                 <Mail size={13} className="text-teal-600" />
-                hello@doctorai.in
+                hello@clinicsuite.in
               </li>
               <li className="flex items-center gap-2">
                 <MapPin size={13} className="text-teal-600" />
@@ -1528,8 +1560,8 @@ export function LandingPage() {
             </ul>
           </div>
         </div>
-        <div className="mx-auto mt-10 flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-slate-900 pt-6 text-[11px] text-slate-600">
-          <p>© 2026 DoctorAI. All rights reserved.</p>
+        <div className="mx-auto mt-10 flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6 text-[11px] text-slate-600">
+          <p>© 2026 ClinicSuite. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-teal-400 transition">
               Privacy Policy

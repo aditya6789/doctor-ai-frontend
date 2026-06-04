@@ -31,10 +31,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MediNova AI | Futuristic Healthcare",
+  title: "ClinicSuite | AI Clinic Automation",
   description:
-    "AI-assisted doctor consultations, smart appointments, and modern digital healthcare — all in one platform.",
-  keywords: "healthcare AI, doctor consultation, telemedicine, MediNova",
+    "Automate patient chat, reviews, bookings, and health content for modern Indian clinics — all in one platform.",
+  keywords: "ClinicSuite, clinic automation, healthcare AI, patient booking, telemedicine India",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

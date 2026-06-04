@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import {
   ArrowLeft,
   CheckCircle2,
   Eye,
   EyeOff,
-  Heart,
   Loader2,
   Lock,
   LogIn,
@@ -106,14 +106,13 @@ export default function AuthPage() {
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/5 blur-2xl" />
 
         {/* logo */}
-        <a href="/" className="relative z-10 flex items-center gap-2 w-max">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-            <Heart size={18} fill="white" className="text-white" />
-          </div>
-          <span className="text-xl font-extrabold tracking-tight">
-            Medi<span className="text-teal-300">Care</span>
-          </span>
-        </a>
+        <BrandLogo
+          variant="full"
+          href="/"
+          className="relative z-10"
+          imageClassName="h-9 brightness-0 invert"
+          priority
+        />
 
         {/* headline */}
         <div className="relative z-10 space-y-8">
@@ -125,7 +124,7 @@ export default function AuthPage() {
               Your health journey,<br />powered by <span className="text-teal-300">AI</span>
             </h2>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-teal-100">
-              Join thousands of patients and doctors who trust MediCare for smarter, faster, and more personal healthcare.
+              Join thousands of clinics who trust ClinicSuite for smarter, faster, and more personal patient care.
             </p>
           </div>
 
@@ -141,7 +140,7 @@ export default function AuthPage() {
           {/* testimonial */}
           <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
             <p className="text-sm leading-relaxed text-teal-50">
-              &ldquo;MediCare changed how I manage my clinic. Bookings and patient follow-ups are fully automated now.&rdquo;
+              &ldquo;ClinicSuite changed how I manage my clinic. Bookings and patient follow-ups are fully automated now.&rdquo;
             </p>
             <div className="mt-3 flex items-center gap-3">
               <img
@@ -159,7 +158,7 @@ export default function AuthPage() {
 
         {/* bottom note */}
         <p className="relative z-10 text-xs text-teal-400">
-          © 2025 MediCare Health. All rights reserved.
+          © 2026 ClinicSuite. All rights reserved.
         </p>
       </div>
 
@@ -177,12 +176,7 @@ export default function AuthPage() {
 
         <div className="w-full max-w-[420px]">
           {/* mobile logo */}
-          <div className="mb-8 flex items-center gap-2 lg:hidden">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500">
-              <Heart size={17} fill="white" className="text-white" />
-            </div>
-            <span className="text-xl font-extrabold">Medi<span className="text-teal-500">Care</span></span>
-          </div>
+          <BrandLogo variant="full" href="/" className="mb-8 lg:hidden" priority />
 
           {/* heading */}
           <div className="mb-8">
@@ -192,7 +186,7 @@ export default function AuthPage() {
             <p className="mt-2 text-sm text-slate-500">
               {isLogin
                 ? "Sign in to access your health dashboard"
-                : "Join MediCare and take control of your health"}
+                : "Join ClinicSuite and automate your clinic"}
             </p>
           </div>
 
