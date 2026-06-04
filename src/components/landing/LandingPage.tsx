@@ -735,8 +735,7 @@ export function LandingPage() {
               : "border-transparent bg-transparent"
           )}
         >
-          <BrandLogo variant="icon" href="/" className="sm:hidden" priority />
-          <BrandLogo variant="full" href="/" className="hidden sm:inline-flex" priority />
+          <BrandLogo variant="full" href="/" size="xl" priority />
 
           <nav className="hidden items-center gap-1 rounded-full border border-slate-200 bg-white/80 p-1 text-sm font-semibold text-slate-600 shadow-sm md:flex">
             {navLinks.map((l) => (
@@ -806,7 +805,7 @@ export function LandingPage() {
                   transition={{ type: "spring", damping: 28, stiffness: 320 }}
                 >
                   <div className="flex items-center justify-between border-b border-slate-200 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
-                    <BrandLogo variant="full" href="/" imageClassName="h-8" />
+                    <BrandLogo variant="full" href="/" size="md" />
                     <button
                       type="button"
                       onClick={() => setMenuOpen(false)}
@@ -1529,7 +1528,7 @@ export function LandingPage() {
       <footer className="border-t border-slate-200 bg-white/80 px-4 py-14 backdrop-blur-sm sm:px-6">
         <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-4 text-left">
           <div className="sm:col-span-2 space-y-3.5">
-            <BrandLogo variant="full" href="/" imageClassName="h-9 sm:h-10" />
+            <BrandLogo variant="full" href="/" size="lg" />
             <p className="max-w-xs text-xs leading-relaxed text-slate-500">
               AI-powered practice growth, patient communication, ratings autopilot, and reels marketing studio for modern Indian clinics.
             </p>

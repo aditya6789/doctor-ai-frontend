@@ -4,9 +4,24 @@ import { cn } from "@/lib/utils";
 
 export const BRAND_NAME = "ClinicSuite";
 
+const fullSizeClasses = {
+  sm: "h-10 w-auto max-w-[200px]",
+  md: "h-12 w-auto max-w-[240px] sm:h-14",
+  lg: "h-14 w-auto max-w-[280px] sm:h-16",
+  xl: "h-16 w-auto max-w-[320px] sm:h-[4.5rem]",
+} as const;
+
+const iconSizeClasses = {
+  sm: "h-10 w-10",
+  md: "h-12 w-12",
+  lg: "h-14 w-14",
+  xl: "h-16 w-16",
+} as const;
+
 type BrandLogoProps = {
   /** `full` = icon + wordmark; `icon` = grid mark only */
   variant?: "full" | "icon";
+  size?: keyof typeof fullSizeClasses;
   href?: string | null;
   className?: string;
   imageClassName?: string;
@@ -15,6 +30,7 @@ type BrandLogoProps = {
 
 export function BrandLogo({
   variant = "full",
+  size = "md",
   href = "/",
   className,
   imageClassName,
@@ -22,17 +38,18 @@ export function BrandLogo({
 }: BrandLogoProps) {
   const src = variant === "full" ? "/full_logo.png" : "/logo.png";
   const isFull = variant === "full";
+  const dimension = isFull ? { width: 360, height: 96 } : { width: 64, height: 64 };
 
   const image = (
     <Image
       src={src}
       alt={BRAND_NAME}
-      width={isFull ? 200 : 44}
-      height={isFull ? 52 : 44}
+      width={dimension.width}
+      height={dimension.height}
       priority={priority}
       className={cn(
-        "h-auto w-auto object-contain object-left",
-        isFull ? "h-8 w-auto max-w-[min(100%,200px)] sm:h-9" : "h-9 w-9 sm:h-10 sm:w-10",
+        "object-contain object-left",
+        isFull ? fullSizeClasses[size] : iconSizeClasses[size],
         imageClassName
       )}
     />

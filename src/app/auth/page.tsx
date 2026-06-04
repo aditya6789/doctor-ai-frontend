@@ -109,8 +109,9 @@ export default function AuthPage() {
         <BrandLogo
           variant="full"
           href="/"
+          size="xl"
           className="relative z-10"
-          imageClassName="h-9 brightness-0 invert"
+          imageClassName="brightness-0 invert"
           priority
         />
 
@@ -176,7 +177,7 @@ export default function AuthPage() {
 
         <div className="w-full max-w-[420px]">
           {/* mobile logo */}
-          <BrandLogo variant="full" href="/" className="mb-8 lg:hidden" priority />
+          <BrandLogo variant="full" href="/" size="lg" className="mb-8 lg:hidden" priority />
 
           {/* heading */}
           <div className="mb-8">

@@ -62,19 +62,17 @@ export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: Side
       </div>
 
       <div className="relative border-b border-white/[0.06] px-5 py-5">
-        <div className="flex items-center gap-3">
+        <div className="space-y-2">
           <BrandLogo
-            variant="icon"
+            variant="full"
             href="/dashboard"
-            imageClassName="h-10 w-10 rounded-lg bg-white/95 p-1"
+            size="lg"
+            imageClassName="rounded-xl bg-white p-2 shadow-sm"
           />
-          <div>
-            <p className="text-[15px] font-bold tracking-tight text-white">ClinicSuite</p>
-            <p className="mt-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              <Sparkles size={9} className="text-teal-400/90" />
-              Clinic OS
-            </p>
-          </div>
+          <p className="flex items-center gap-1.5 pl-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <Sparkles size={9} className="text-teal-400/90" />
+            Clinic OS
+          </p>
         </div>
       </div>
 
