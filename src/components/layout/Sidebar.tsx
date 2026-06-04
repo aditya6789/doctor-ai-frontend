@@ -66,8 +66,8 @@ export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: Side
           <BrandLogo
             variant="full"
             href="/dashboard"
-            size="lg"
-            imageClassName="rounded-xl bg-white p-2 shadow-sm"
+            size="xl"
+            imageClassName="w-full max-w-[220px] rounded-xl bg-white p-2.5 shadow-sm"
           />
           <p className="flex items-center gap-1.5 pl-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
             <Sparkles size={9} className="text-teal-400/90" />

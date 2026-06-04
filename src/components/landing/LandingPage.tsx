@@ -42,7 +42,7 @@ import {
   Share2,
   Volume2,
 } from "lucide-react";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { BrandLogo, CONTACT_EMAIL } from "@/components/brand/BrandLogo";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -140,19 +140,22 @@ const plans = [
 
 const testimonials = [
   {
-    quote: "Patient response workload 60% kam ho gaya. Staff ab actual patient care aur clinical support pe focus karta hai.",
+    quote:
+      "Patient response workload dropped by 60%. Our staff now focuses on real patient care and clinical support.",
     name: "Dr. Mehak Arora",
     role: "CityCare Clinic · Mumbai",
     initials: "MA",
   },
   {
-    quote: "Review autopilot ne hamari Google Maps rating ko 3.8 se 4.8 kar diya sirf 6 weeks mein. Appointments double ho gaye hain.",
+    quote:
+      "Review autopilot raised our Google Maps rating from 3.8 to 4.8 in just six weeks. Appointments have doubled.",
     name: "Dr. Ritesh Jain",
     role: "WellSpring Health · Delhi",
     initials: "RJ",
   },
   {
-    quote: "Ek hi din mein AI chatbot launch ho gaya, aur automated WhatsApp confirmation se slots easily fill hone lage.",
+    quote:
+      "We launched the AI chatbot in one day, and automated WhatsApp confirmations started filling slots right away.",
     name: "Dr. Aviral Singh",
     role: "PrimeSkin · Bangalore",
     initials: "AS",
@@ -202,11 +205,26 @@ const featureAccent: Record<
 };
 
 const faqs = [
-  { q: "ClinicSuite ko setup karne mein kitna time lagta hai?", a: "Almost check-in setups 5 minutes se kam mein live ho jaate hain. Aapko kisi technical coding or developer support ki zaroorat nahi hai." },
-  { q: "Kya hamara purana clinical booking system integration support karega?", a: "Haan. ClinicSuite APIs aur hooks ke zariye standard CRM aur EHR softwares se automatically connect ho jaata hai." },
-  { q: "AI chatbot kaunsi languages ko support karta hai?", a: "Hindi, English, Hinglish aur 10+ regional Indian languages (Bengali, Tamil, Telugu, etc.) support karta hai automatically text language detect karke." },
-  { q: "Kya hamara patient data secure hai?", a: "Absolutes. ClinicSuite, HIPAA compliance requirements follow karta hai. Aapka data fully encrypted rehta hai state-of-the-art 256-bit encryption standard ke sath AWS India servers mein." },
-  { q: "Kya free trial ke liye credit card card detail ki zaroorat hoti hai?", a: "Nahi. 14-day full platform access free trial bilkul free hai without filling credit card card details." },
+  {
+    q: "How long does it take to set up ClinicSuite?",
+    a: "Most clinics go live in under 5 minutes. No coding or developer support is required.",
+  },
+  {
+    q: "Will ClinicSuite integrate with our existing booking system?",
+    a: "Yes. ClinicSuite connects to standard CRM and EHR tools through APIs and webhooks.",
+  },
+  {
+    q: "Which languages does the AI chatbot support?",
+    a: "Hindi, English, Hinglish, and 10+ regional Indian languages (Bengali, Tamil, Telugu, and more), with automatic language detection.",
+  },
+  {
+    q: "Is our patient data secure?",
+    a: "Yes. ClinicSuite follows HIPAA-aligned security practices. Your data is encrypted in transit and at rest with 256-bit encryption on AWS India servers.",
+  },
+  {
+    q: "Do I need a credit card for the free trial?",
+    a: "No. The 14-day trial is completely free — no credit card required.",
+  },
 ];
 
 const brands = ["CityCare Multispecialty", "Nexa Dental Care", "OrthoOne Clinic", "WellSpring Health", "PrimeSkin Clinic", "ZenCare Pediatrics", "HealthFirst Diagnostics"];
@@ -287,7 +305,7 @@ function InteractiveHeroMockup() {
           <span className="h-3 w-3 rounded-full bg-amber-400" />
           <span className="h-3 w-3 rounded-full bg-teal-500" />
           <span className="ml-3 rounded-lg border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold text-slate-500">
-            app.clinicsuite.in/dashboard
+            app.clinicsuite.cloud/dashboard
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -729,13 +747,13 @@ export function LandingPage() {
       <header className="sticky top-0 z-50 px-4 pt-4 sm:px-6">
         <div
           className={cn(
-            "mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-2xl border px-4 py-3 transition-all duration-500 sm:px-6",
+            "mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-2xl border px-4 py-3.5 transition-all duration-500 sm:px-6 sm:py-4",
             scrolled
               ? "landing-glass border-slate-200/90 shadow-lg shadow-slate-200/60"
               : "border-transparent bg-transparent"
           )}
         >
-          <BrandLogo variant="full" href="/" size="xl" priority />
+          <BrandLogo variant="full" href="/" size="2xl" priority />
 
           <nav className="hidden items-center gap-1 rounded-full border border-slate-200 bg-white/80 p-1 text-sm font-semibold text-slate-600 shadow-sm md:flex">
             {navLinks.map((l) => (
@@ -805,7 +823,7 @@ export function LandingPage() {
                   transition={{ type: "spring", damping: 28, stiffness: 320 }}
                 >
                   <div className="flex items-center justify-between border-b border-slate-200 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
-                    <BrandLogo variant="full" href="/" size="md" />
+                    <BrandLogo variant="full" href="/" size="lg" />
                     <button
                       type="button"
                       onClick={() => setMenuOpen(false)}
@@ -1490,6 +1508,20 @@ export function LandingPage() {
               );
             })}
           </div>
+
+          <div className="landing-glass-strong mt-10 rounded-2xl border border-teal-200/60 px-6 py-8 text-center sm:px-10">
+            <h3 className="text-lg font-bold text-slate-900">Contact us</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Have questions? Reach out anytime — we&apos;re happy to help.
+            </p>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-teal-50 px-5 py-3 text-sm font-semibold text-teal-800 transition hover:bg-teal-100"
+            >
+              <Mail size={16} className="text-teal-600" />
+              {CONTACT_EMAIL}
+            </a>
+          </div>
         </div>
       </section>
 
@@ -1514,10 +1546,10 @@ export function LandingPage() {
                 Start free trial <ArrowRight size={16} />
               </a>
               <a
-                href="mailto:hello@clinicsuite.in"
+                href={`mailto:${CONTACT_EMAIL}`}
                 className="landing-glass inline-flex items-center gap-2 rounded-2xl px-9 py-4 text-sm font-semibold text-slate-700 transition hover:border-teal-300"
               >
-                Talk to sales <ArrowUpRight size={16} className="text-teal-600" />
+                Contact us <ArrowUpRight size={16} className="text-teal-600" />
               </a>
             </div>
           </div>
@@ -1528,7 +1560,7 @@ export function LandingPage() {
       <footer className="border-t border-slate-200 bg-white/80 px-4 py-14 backdrop-blur-sm sm:px-6">
         <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-4 text-left">
           <div className="sm:col-span-2 space-y-3.5">
-            <BrandLogo variant="full" href="/" size="lg" />
+            <BrandLogo variant="full" href="/" size="xl" />
             <p className="max-w-xs text-xs leading-relaxed text-slate-500">
               AI-powered practice growth, patient communication, ratings autopilot, and reels marketing studio for modern Indian clinics.
             </p>
@@ -1548,9 +1580,14 @@ export function LandingPage() {
           <div>
             <h4 className="text-xs font-black uppercase tracking-widest text-slate-900">Contact</h4>
             <ul className="mt-4 space-y-2.5 text-xs text-slate-500">
-              <li className="flex items-center gap-2">
-                <Mail size={13} className="text-teal-600" />
-                hello@clinicsuite.in
+              <li>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="flex items-center gap-2 transition hover:text-teal-600"
+                >
+                  <Mail size={13} className="text-teal-600" />
+                  {CONTACT_EMAIL}
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin size={13} className="text-teal-600" />
