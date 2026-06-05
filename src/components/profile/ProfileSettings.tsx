@@ -26,6 +26,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { DashAlert, DashCard } from "@/components/layout/DashboardPrimitives";
+import { useLanguage } from "@/lib/LanguageContext";
 import {
   chatbotApi,
   type ChatbotCustomizationResponse,
@@ -56,6 +57,7 @@ interface ProfileSettingsProps {
 }
 
 export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
+  const { t, language } = useLanguage();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [customizationLoading, setCustomizationLoading] = useState(true);
@@ -148,7 +150,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       const c = await chatbotApi.getCustomization();
       applyCustomization(c);
     } catch (err: unknown) {
-      setCustomizationError(err instanceof Error ? err.message : "Could not load chatbot customization.");
+      setCustomizationError(err instanceof Error ? err.message : t("profile.loadCustomizationFailed", "Could not load chatbot customization."));
     } finally {
       setCustomizationLoading(false);
     }
@@ -184,9 +186,9 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
     try {
       await chatbotApi.putCustomization(buildSaveBody());
       await fetchCustomization();
-      setMessage("Profile saved. PDFs, embed widget, and AI replies use these details.");
+      setMessage(t("profile.saveSuccessAlert", "Profile saved. PDFs, embed widget, and AI replies use these details."));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not save profile.");
+      setError(err instanceof Error ? err.message : t("profile.saveErrorAlert", "Could not save profile."));
     } finally {
       setCustomizationSaving(false);
     }
@@ -205,10 +207,12 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       await fetchCustomization();
       const pageCount = result.pages?.length ?? 1;
       setMessage(
-        `Website scraped: ${result.extracted_chars ?? 0} characters from ${pageCount} page(s).`
+        t("profile.scrapeSuccessAlert", "Website scraped: {chars} characters from {pages} page(s).")
+          .replace("{chars}", String(result.extracted_chars ?? 0))
+          .replace("{pages}", String(pageCount))
       );
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Website scrape failed.");
+      setError(err instanceof Error ? err.message : t("profile.scrapeFailedAlert", "Website scrape failed."));
       await fetchCustomization();
     } finally {
       setScrapeLoading(false);
@@ -219,7 +223,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
     const url = newExtraUrl.trim();
     if (!url) return;
     if (extraUrls.length >= MAX_EXTRA_URLS) {
-      setError(`Maximum ${MAX_EXTRA_URLS} extra URLs allowed.`);
+      setError(t("profile.maxUrlsAlert", "Maximum {max} extra URLs allowed.").replace("{max}", String(MAX_EXTRA_URLS)));
       return;
     }
     if (extraUrls.includes(url)) {
@@ -244,10 +248,10 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
     setSignatureUploading(true);
     try {
       await chatbotApi.uploadSignature(file);
-      setMessage("Signature / logo uploaded. It will appear on treatment estimate PDFs.");
+      setMessage(t("profile.signatureUploadSuccessAlert", "Signature / logo uploaded. It will appear on treatment estimate PDFs."));
       await fetchSignatureStatus();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Signature upload failed.");
+      setError(err instanceof Error ? err.message : t("profile.signatureUploadFailedAlert", "Signature upload failed."));
     } finally {
       setSignatureUploading(false);
     }
@@ -288,28 +292,29 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           <div className="inline-flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2">
             <Building2 className="h-6 w-6 shrink-0 text-teal-600" aria-hidden />
             <div>
-              <p className="text-base font-bold text-slate-900">Clinic & chatbot</p>
+              <p className="text-base font-bold text-slate-900">{t("profile.clinicAndChatbot", "Clinic & chatbot")}</p>
               <p className="text-xs text-slate-500">
-                Letterhead fields feed PDFs and the AI system prompt. Login identity stays on{" "}
-                <code className="rounded bg-slate-100 px-1">/auth/me</code> only.
+                {t("profile.clinicDesc", "Letterhead fields feed PDFs and the AI system prompt. Login identity stays on /auth/me only.").includes("/auth/me") ? t("profile.clinicDesc", "Letterhead fields feed PDFs and the AI system prompt. Login identity stays on /auth/me only.").split("/auth/me")[0] : t("profile.clinicDesc", "Letterhead fields feed PDFs and the AI system prompt. Login identity stays on /auth/me only.")}
+                <code className="rounded bg-slate-100 px-1">/auth/me</code>
+                {t("profile.clinicDesc", "Letterhead fields feed PDFs and the AI system prompt. Login identity stays on /auth/me only.").includes("/auth/me") ? t("profile.clinicDesc", "Letterhead fields feed PDFs and the AI system prompt. Login identity stays on /auth/me only.").split("/auth/me")[1] : ""}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-sm">
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&background=0f766e&color=fff&bold=true`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || t("profile.defaultUser", "User"))}&background=0f766e&color=fff&bold=true`}
               alt=""
               className="h-9 w-9 rounded-lg"
             />
             <div className="min-w-0 text-left">
-              <p className="truncate text-sm font-semibold text-slate-900">{user?.name || "Doctor"}</p>
+              <p className="truncate text-sm font-semibold text-slate-900">{user?.name || t("profile.defaultDoctor", "Doctor")}</p>
               <p className="truncate text-xs text-slate-500">{user?.email || "—"}</p>
             </div>
           </div>
         </div>
 
         {customizationLoading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <p className="text-sm text-slate-500">{t("generic.loading", "Loading...")}</p>
         ) : customizationError ? (
           <div className="space-y-3">
             <p className="text-sm text-red-600">{customizationError}</p>
@@ -318,82 +323,82 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
               onClick={() => void fetchCustomization()}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Retry
+              {t("overview.retry", "Retry")}
             </button>
           </div>
         ) : (
           <div className="space-y-6">
             <div className="rounded-xl border border-teal-100 bg-teal-50/50 p-4 text-sm text-slate-700">
-              <p className="font-semibold text-teal-900">Resolved for PDF & model (read-only)</p>
+              <p className="font-semibold text-teal-900">{t("profile.resolvedTitle", "Resolved for PDF & model (read-only)")}</p>
               <p className="mt-1">
-                <span className="text-slate-500">Clinic line: </span>
+                <span className="text-slate-500">{t("profile.clinicLine", "Clinic line: ")}</span>
                 {custResolved.clinic_display_name || "—"}
               </p>
               <p>
-                <span className="text-slate-500">Doctor line: </span>
+                <span className="text-slate-500">{t("profile.doctorLine", "Doctor line: ")}</span>
                 {custResolved.doctor_display_name || "—"}
               </p>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2 text-left">
-                <label className={labelClass}>Bot / public title</label>
+                <label className={labelClass}>{t("profile.botName", "Bot / public title")}</label>
                 <div className="relative">
                   <Sparkles size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input
                     value={custEditor.bot_name}
                     onChange={setCust("bot_name")}
-                    placeholder="e.g. ClinicSuite Assistant"
+                    placeholder={t("profile.botNamePlaceholder", "e.g. ClinicSuite Assistant")}
                     className={inputClass}
                   />
                 </div>
               </div>
 
               <div className="sm:col-span-2 text-left">
-                <label className={labelClass}>Clinic name (letterhead)</label>
+                <label className={labelClass}>{t("profile.clinicName", "Clinic Name")}</label>
                 <div className="relative">
                   <Building2 size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input
                     value={custEditor.clinic_name}
                     onChange={setCust("clinic_name")}
-                    placeholder="Formal clinic name — if empty, bot name is used"
+                    placeholder={t("profile.clinicNamePlaceholder", "Formal clinic name — if empty, bot name is used")}
                     className={inputClass}
                   />
                 </div>
               </div>
 
               <div className="sm:col-span-2 text-left">
-                <label className={labelClass}>Doctor name</label>
+                <label className={labelClass}>{t("profile.doctorName", "Doctor Name")}</label>
                 <div className="relative">
                   <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input
                     value={custEditor.doctor_name}
                     onChange={setCust("doctor_name")}
-                    placeholder="e.g. Dr Your Name — if empty, account name is used"
+                    placeholder={t("profile.doctorNamePlaceholder", "e.g. Dr Your Name — if empty, account name is used")}
                     className={inputClass}
                   />
                 </div>
               </div>
 
               <div className="sm:col-span-2 text-left">
-                <label className={labelClass}>Clinic address</label>
+                <label className={labelClass}>{t("profile.clinicAddress", "Clinic address")}</label>
                 <textarea
                   value={custEditor.clinic_address}
                   onChange={setCust("clinic_address")}
-                  placeholder="Full address, city, PIN"
+                  placeholder={t("profile.clinicAddressPlaceholder", "Full address, city, PIN")}
                   rows={3}
                   className={`${textareaClass} resize-y`}
                 />
               </div>
 
               <div className="sm:col-span-2 text-left">
-                <label className={labelClass}>Clinic phone</label>
+                <label className={labelClass}>{t("profile.clinicPhone", "Clinic phone")}</label>
                 <div className="relative">
                   <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input
                     value={custEditor.clinic_phone}
                     onChange={setCust("clinic_phone")}
-                    placeholder="+91 …"
+                    placeholder={t("profile.clinicPhonePlaceholder", "+91 …")}
                     className={inputClass}
                   />
                 </div>
@@ -403,22 +408,21 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             <div className="border-t border-slate-100 pt-5">
               <div className="mb-3 inline-flex items-center gap-2 text-slate-700">
                 <BookOpen size={16} className="text-teal-600" aria-hidden />
-                <span className="text-sm font-bold">Knowledge base</span>
+                <span className="text-sm font-bold">{t("profile.knowledgeBase", "Knowledge Base")}</span>
               </div>
               <p className="mb-4 text-xs text-slate-500">
-                Manual notes plus scraped website text power AI answers. Scraped text is never exposed
-                publicly — only a character count is shown here.
+                {t("profile.knowledgeDesc", "Manual notes plus scraped website text power AI answers. Scraped text is never exposed publicly — only a character count is shown here.")}
               </p>
 
               <div className="space-y-4">
                 <div className="space-y-1.5 text-left">
-                  <label className={labelClass}>Clinic website (primary scrape URL)</label>
+                  <label className={labelClass}>{t("profile.clinicWebsite", "Clinic website (primary scrape URL)")}</label>
                   <div className="relative">
                     <Globe size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                       value={custEditor.website_url}
                       onChange={setCust("website_url")}
-                      placeholder="https://myclinic.com"
+                      placeholder={t("profile.clinicWebsitePlaceholder", "https://myclinic.com")}
                       type="url"
                       className={inputClass}
                     />
@@ -427,15 +431,14 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
 
                 <div className="space-y-1.5 text-left">
                   <label className={labelClass}>
-                    Additional info (timings, fees, services) — max {KNOWLEDGE_MAX.toLocaleString()}{" "}
-                    chars
+                    {t("profile.additionalInfo", "Additional info (timings, fees, services) — max {max} chars").replace("{max}", KNOWLEDGE_MAX.toLocaleString(language === "en" ? "en-US" : language === "hi" ? "hi-IN" : "de-DE"))}
                   </label>
                   <textarea
                     value={custEditor.knowledge_additional}
                     onChange={setCust("knowledge_additional")}
                     maxLength={KNOWLEDGE_MAX}
-                    placeholder="OPD: Mon–Sat 10am–6pm. Consultation ₹500. Cashless: HDFC, ICICI…"
-                    rows={6}
+                    placeholder={t("profile.additionalInfoPlaceholder", "OPD: Mon–Sat 10am–6pm. Consultation ₹500. Cashless: HDFC, ICICI…")}
+                    rows={4}
                     className={`${textareaClass} resize-y`}
                   />
                   <p className="text-right text-[10px] font-bold text-slate-400 font-mono">
@@ -445,16 +448,15 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <span className={labelClass}>Extra pages to scrape (max {MAX_EXTRA_URLS})</span>
-                  <p className="text-xs text-slate-500 font-medium">About, Services, etc. — merged with homepage on scrape.</p>
-                  <div className="flex flex-wrap gap-2">
+                  <span className={labelClass}>{t("profile.extraPages", "Extra pages to scrape (max {max})").replace("{max}", String(MAX_EXTRA_URLS))}</span>
+                  <div className="flex gap-2">
                     <div className="relative flex-1 min-w-0">
                       <Link2 size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                       <input
                         value={newExtraUrl}
                         onChange={(e) => setNewExtraUrl(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addExtraUrl())}
-                        placeholder="https://myclinic.com/services"
+                        placeholder={t("profile.extraPagesPlaceholder", "https://myclinic.com/services")}
                         type="url"
                         className={inputClass}
                       />
@@ -463,9 +465,9 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                       type="button"
                       onClick={addExtraUrl}
                       disabled={extraUrls.length >= MAX_EXTRA_URLS}
-                      className="shrink-0 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-bold text-teal-705 transition hover:bg-teal-100 active:scale-95 disabled:opacity-50 shadow-sm"
+                      className="shrink-0 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-bold text-teal-700 transition hover:bg-teal-100 active:scale-95 disabled:opacity-50 shadow-sm"
                     >
-                      Add URL
+                      {t("profile.addUrl", "Add URL")}
                     </button>
                   </div>
                   {extraUrls.length > 0 && (
@@ -473,15 +475,15 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                       {extraUrls.map((url, i) => (
                         <li
                           key={`${url}-${i}`}
-                          className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-2 text-xs text-slate-650"
+                          className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-2 text-xs text-slate-600"
                         >
                           <Globe size={13} className="shrink-0 text-teal-600" />
                           <span className="min-w-0 flex-1 truncate font-medium">{url}</span>
                           <button
                             type="button"
                             onClick={() => removeExtraUrl(i)}
-                            className="rounded-lg p-1 text-slate-400 hover:bg-red-50 hover:text-red-650 transition active:scale-95"
-                            aria-label="Remove URL"
+                            className="rounded-lg p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 transition active:scale-95"
+                            aria-label={t("profile.removeUrl", "Remove URL")}
                           >
                             <X size={14} />
                           </button>
@@ -498,30 +500,30 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                     <span className="h-2 w-2 rounded-full bg-red-500/80" />
                     <span className="h-2 w-2 rounded-full bg-yellow-500/80" />
                     <span className="h-2 w-2 rounded-full bg-green-500/80" />
-                    <span className="ml-1 text-[9px] text-slate-500 uppercase tracking-widest">Knowledge Scraper Status</span>
+                    <span className="ml-1 text-[9px] text-slate-500 uppercase tracking-widest">{t("profile.scraperStatus", "Knowledge Scraper Status")}</span>
                   </div>
 
                   <div className="space-y-2">
                     <p className="flex items-center gap-2">
-                      <span className="text-slate-500">SYSTEM_LOAD:</span>
+                      <span className="text-slate-500">{t("profile.systemLoad", "SYSTEM_LOAD:")}</span>
                       <span className={cn("font-bold uppercase", hasScrapedContent ? "text-emerald-400" : "text-amber-400")}>
-                        {hasScrapedContent ? "SCRAPE_ACTIVE" : "NO_CONTENT_LOADED"}
+                        {hasScrapedContent ? t("profile.statusScrapeActive", "SCRAPE_ACTIVE") : t("profile.statusNoContentLoaded", "NO_CONTENT_LOADED")}
                       </span>
                     </p>
                     <p className="flex items-center gap-2">
-                      <span className="text-slate-500">CONTENT_SIZE:</span>
+                      <span className="text-slate-500">{t("profile.contentSize", "CONTENT_SIZE:")}</span>
                       <span className="font-bold text-teal-400">{scrapeMeta.scraped_content_preview_chars.toLocaleString()} bytes</span>
                     </p>
                     {scrapeMeta.last_scrape_at && (
                       <p className="flex items-center gap-2">
-                        <span className="text-slate-500">LAST_SCAN:</span>
+                        <span className="text-slate-500">{t("profile.lastScan", "LAST_SCAN:")}</span>
                         <span className="text-slate-205">{formatScrapeTime(scrapeMeta.last_scrape_at)}</span>
                       </p>
                     )}
                     {scrapeFailed && (
                       <div className="flex items-start gap-2 border border-red-900/30 bg-red-950/20 p-2.5 rounded-xl mt-2 text-red-400">
                         <AlertTriangle size={14} className="shrink-0 mt-0.5" />
-                        <p className="leading-relaxed">ERROR: {scrapeMeta.last_scrape_error}</p>
+                        <p className="leading-relaxed">{t("profile.errorLabel", "ERROR:")} {scrapeMeta.last_scrape_error}</p>
                       </div>
                     )}
                   </div>
@@ -534,10 +536,10 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                       className="btn-shine inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-teal-950/30 transition hover:bg-teal-700 active:scale-95 disabled:opacity-50"
                     >
                       {scrapeLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
-                      {scrapeLoading ? "SCRAPING_ASSETS…" : "SCRAPE NOW"}
+                      {scrapeLoading ? t("profile.scrapingAssets", "SCRAPING_ASSETS...") : t("profile.scrapeNow", "SCRAPE NOW")}
                     </button>
                     <span className="text-[10px] text-slate-500 leading-normal">
-                      Note: Scrape pulls index and deep links up to 10 subpages.
+                      {t("profile.scrapeNote", "Note: Scrape pulls index and deep links up to 10 subpages.")}
                     </span>
                   </div>
                 </div>
@@ -547,30 +549,29 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             <div className="border-t border-slate-100 pt-5">
               <div className="mb-3 inline-flex items-center gap-2 text-slate-700">
                 <ShieldCheck size={16} className="text-teal-600" aria-hidden />
-                <span className="text-sm font-bold">Clinical scope</span>
+                <span className="text-sm font-bold">{t("profile.clinicalScope", "Clinical scope")}</span>
               </div>
               <p className="mb-4 text-xs text-slate-500">
-                Controls how strictly the bot stays within your specialty and refuses off-topic medical
-                detail.
+                {t("profile.clinicalScopeDesc", "Controls how strictly the bot stays within your specialty and refuses off-topic medical detail.")}
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-1.5 sm:col-span-2">
-                  <span className={labelClass}>Clinical focus (comma-separated, max {CLINICAL_FOCUS_MAX})</span>
+                  <span className={labelClass}>{t("profile.clinicalFocus", "Clinical focus (comma-separated, max {max})").replace("{max}", CLINICAL_FOCUS_MAX.toLocaleString(language === "en" ? "en-US" : language === "hi" ? "hi-IN" : "de-DE"))}</span>
                   <input
                     value={custEditor.clinical_focus}
                     onChange={setCust("clinical_focus")}
                     maxLength={CLINICAL_FOCUS_MAX}
-                    placeholder="diabetes, thyroid, sugar, lifestyle"
+                    placeholder={t("profile.clinicalFocusPlaceholder", "diabetes, thyroid, sugar, lifestyle")}
                     className={inputClass}
                   />
                 </label>
                 <label className="space-y-1.5 sm:col-span-2">
-                  <span className={labelClass}>Off-topic keywords (max {OFF_TOPIC_MAX})</span>
+                  <span className={labelClass}>{t("profile.offTopicKeywords", "Off-topic keywords (max {max})").replace("{max}", OFF_TOPIC_MAX.toLocaleString(language === "en" ? "en-US" : language === "hi" ? "hi-IN" : "de-DE"))}</span>
                   <input
                     value={custEditor.off_topic_keywords}
                     onChange={setCust("off_topic_keywords")}
                     maxLength={OFF_TOPIC_MAX}
-                    placeholder="cancer, chemo, oncology, cardiac surgery"
+                    placeholder={t("profile.offTopicKeywordsPlaceholder", "cancer, chemo, oncology, cardiac surgery")}
                     className={inputClass}
                   />
                 </label>
@@ -582,8 +583,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                     className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                   />
                   <span className="text-sm text-slate-700">
-                    <span className="font-semibold">Strict scope</span> — refuse detailed advice outside
-                    clinical focus (recommended)
+                    <span className="font-semibold">{t("profile.strictScope", "Strict scope")}</span> {t("profile.strictScopeDesc", "— refuse detailed advice outside clinical focus (recommended)")}
                   </span>
                 </label>
               </div>
@@ -592,22 +592,22 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             <div className="border-t border-slate-100 pt-5">
               <div className="mb-3 inline-flex items-center gap-2 text-slate-700">
                 <Palette size={16} className="text-teal-600" aria-hidden />
-                <span className="text-sm font-bold">Embed widget</span>
+                <span className="text-sm font-bold">{t("profile.embedWidget", "Embed widget")}</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2 text-left">
-                  <label className={labelClass}>Welcome message</label>
+                  <label className={labelClass}>{t("profile.welcomeMessage", "Welcome message")}</label>
                   <textarea
                     value={custEditor.welcome_message}
                     onChange={setCust("welcome_message")}
-                    placeholder="Namaste! Main aapki madad kaise kar sakta hoon?"
+                    placeholder={t("profile.welcomeMessagePlaceholder", "Namaste! Main aapki madad kaise kar sakta hoon?")}
                     rows={2}
                     className={`${textareaClass} resize-y`}
                   />
                 </div>
 
                 <div className="sm:col-span-2 text-left space-y-2">
-                  <label className={labelClass}>Primary color theme</label>
+                  <label className={labelClass}>{t("profile.primaryColorTheme", "Primary color theme")}</label>
                   <div className="flex flex-wrap items-center gap-3">
                     {colorPresets.map((preset) => {
                       const isSelected = custEditor.primary_color.toLowerCase() === preset.hex;
@@ -657,38 +657,38 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                 </div>
 
                 <div className="sm:col-span-1 text-left">
-                  <label className={labelClass}>Widget position</label>
+                  <label className={labelClass}>{t("profile.widgetPosition", "Widget position")}</label>
                   <select
                     value={custEditor.position}
                     onChange={setCust("position")}
                     className={selectClass}
                   >
-                    <option value="right">Right</option>
-                    <option value="left">Left</option>
+                    <option value="right">{t("profile.positionRight", "Right")}</option>
+                    <option value="left">{t("profile.positionLeft", "Left")}</option>
                   </select>
                 </div>
 
                 <div className="sm:col-span-1 text-left">
-                  <label className={labelClass}>Launcher label</label>
+                  <label className={labelClass}>{t("profile.launcherLabel", "Launcher label")}</label>
                   <div className="relative">
                     <MessageSquare size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                       value={custEditor.launcher_text}
                       onChange={setCust("launcher_text")}
-                      placeholder="Chat"
+                      placeholder={t("profile.launcherPlaceholder", "Chat")}
                       className={inputClass}
                     />
                   </div>
                 </div>
 
                 <div className="sm:col-span-2 text-left">
-                  <label className={labelClass}>Bot icon URL</label>
+                  <label className={labelClass}>{t("profile.botIconUrl", "Bot icon URL")}</label>
                   <div className="relative">
                     <Image size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
                       value={custEditor.icon_url}
                       onChange={setCust("icon_url")}
-                      placeholder="https://cdn.example.com/icon.png"
+                      placeholder={t("profile.botIconUrlPlaceholder", "https://cdn.example.com/icon.png")}
                       type="url"
                       className={inputClass}
                     />
@@ -704,10 +704,10 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                 onClick={() => void saveChatbotCustomization()}
                 className="rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-700 disabled:opacity-50"
               >
-                {customizationSaving ? "Saving…" : "Save profile"}
+                {customizationSaving ? t("profile.saving", "Saving...") : t("profile.saveProfile", "Save profile")}
               </button>
               <p className="text-xs text-slate-500">
-                Save clinic + knowledge + scope, then scrape website. Test answers in AI Health Chat.
+                {t("profile.saveProfileDesc", "Save clinic + knowledge + scope, then scrape website. Test answers in AI Health Chat.")}
               </p>
             </div>
           </div>
@@ -718,9 +718,9 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         <div className="mb-4 inline-flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2">
           <PenLine className="h-6 w-6 shrink-0 text-teal-600" aria-hidden />
           <div>
-            <p className="text-base font-bold text-slate-900">PDF signature / logo</p>
+            <p className="text-base font-bold text-slate-900">{t("profile.pdfSignature", "PDF signature / logo")}</p>
             <p className="text-xs text-slate-500 font-medium">
-              Shown at the bottom of treatment estimate PDFs. Accepts PNG, JPEG, WebP, or GIF (max ~2.5 MB).
+              {t("profile.pdfSignatureDesc", "Shown at the bottom of treatment estimate PDFs. Accepts PNG, JPEG, WebP, or GIF (max ~2.5 MB).")}
             </p>
           </div>
         </div>
@@ -758,10 +758,10 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             </div>
 
             <p className="text-sm font-semibold text-slate-700">
-              {signatureUploading ? "Uploading Signature Assets…" : signatureConfigured ? "Signature Configured" : "Upload your Signature / Logo"}
+              {signatureUploading ? t("profile.uploadingSignature", "Uploading Signature Assets...") : signatureConfigured ? t("profile.signatureConfigured", "Signature Configured") : t("profile.uploadSignature", "Upload your Signature / Logo")}
             </p>
             <p className="mt-1 text-xs text-slate-405 font-medium">
-              {signatureUploading ? "Please wait, uploading to cloud bucket..." : "Drag & drop or click to browse files"}
+              {signatureUploading ? t("profile.uploadingWait", "Please wait, uploading to cloud bucket...") : t("profile.dragDropBrowse", "Drag & drop or click to browse files")}
             </p>
             
             {/* Hover subtle glow ring */}
@@ -772,29 +772,28 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           <div className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-5 text-left">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Integration Channel</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t("profile.integrationChannel", "Integration Channel")}</span>
                 <span className={cn(
                   "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border",
                   signatureConfigured 
                     ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
                     : "bg-amber-50 text-amber-700 border-amber-200"
                 )}>
-                  {signatureConfigured ? "ACTIVE" : "PENDING"}
+                  {signatureConfigured ? t("profile.statusActive", "ACTIVE") : t("profile.statusPending", "PENDING")}
                 </span>
               </div>
 
               <div className="space-y-1">
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide">Signature Status Badge</h4>
                 <p className="text-xs text-slate-500 font-medium leading-relaxed">
                   {signatureConfigured 
-                    ? "Successfully loaded and configured for the PDF report generator. Your signature or logo will automatically append onto treatment documents."
-                    : "Not configured yet. Estimate PDFs will print a placeholder line instead of your dynamic letterhead signature/logo stamp."}
+                    ? t("profile.signatureConfiguredDesc", "Successfully loaded and configured for the PDF report generator. Your signature or logo will automatically append onto treatment documents.")
+                    : t("profile.signaturePendingDesc", "Not configured yet. Estimate PDFs will print a placeholder line instead of your dynamic letterhead signature/logo stamp.")}
                 </p>
               </div>
             </div>
 
             <div className="mt-4 pt-4 border-t border-slate-200/50 flex items-center justify-between">
-              <span className="text-[10px] font-mono text-slate-400 uppercase">File Limit: 2.5 MB</span>
+              <span className="text-[10px] font-mono text-slate-400 uppercase">{t("profile.fileLimit", "File Limit: 2.5 MB")}</span>
               {signatureConfigured && (
                 <button
                   type="button"
@@ -802,7 +801,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
                   onClick={() => signatureInputRef.current?.click()}
                   className="text-xs font-bold text-teal-600 hover:text-teal-700 transition"
                 >
-                  Replace Signature
+                  {t("profile.replaceSignature", "Replace Signature")}
                 </button>
               )}
             </div>

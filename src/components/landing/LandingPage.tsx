@@ -44,74 +44,109 @@ import {
 } from "lucide-react";
 import { BrandLogo, CONTACT_EMAIL } from "@/components/brand/BrandLogo";
 import { cn } from "@/lib/utils";
+import { useLanguage, type Language } from "@/lib/LanguageContext";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Pain Points", href: "#pain-points" },
-  { label: "Showcase", href: "#showcase" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
+  { labelKey: "landing.nav.features", defaultLabel: "Features", href: "#features" },
+  { labelKey: "landing.nav.painpoints", defaultLabel: "Pain Points", href: "#pain-points" },
+  { labelKey: "landing.nav.showcase", defaultLabel: "Showcase", href: "#showcase" },
+  { labelKey: "landing.nav.pricing", defaultLabel: "Pricing", href: "#pricing" },
+  { labelKey: "landing.nav.faq", defaultLabel: "FAQ", href: "#faq" },
 ];
 
 const features = [
   {
     icon: Bot,
-    title: "AI Patient Chat",
-    desc: "24/7 assistant for FAQs, triage, and booking nudges — fluent in Hindi, Hinglish, and English.",
+    titleKey: "landing.features.feat1.title",
+    descKey: "landing.features.feat1.desc",
+    defaultTitle: "AI Patient Chat",
+    defaultDesc: "24/7 assistant for FAQs, triage, and booking nudges — fluent in Hindi, Hinglish, and English.",
     accent: "teal",
   },
   {
     icon: Video,
-    title: "Video Studio",
-    desc: "Turn clinical topics into short educational videos with AI script, voice, and caption generation.",
+    titleKey: "landing.features.feat2.title",
+    descKey: "landing.features.feat2.desc",
+    defaultTitle: "Video Studio",
+    defaultDesc: "Turn clinical topics into short educational videos with AI script, voice, and caption generation.",
     accent: "violet",
   },
   {
     icon: Star,
-    title: "Review Autopilot",
-    desc: "Sync Google and Meta reviews, analyze sentiment, and draft polite AI replies in 1 click.",
+    titleKey: "landing.features.feat3.title",
+    descKey: "landing.features.feat3.desc",
+    defaultTitle: "Review Autopilot",
+    defaultDesc: "Sync Google and Meta reviews, analyze sentiment, and draft polite AI replies in 1 click.",
     accent: "amber",
   },
   {
     icon: CalendarCheck2,
-    title: "Smart Booking",
-    desc: "Auto-fill slots with intelligent SMS/WhatsApp reminders, waitlists, and instant confirmations.",
+    titleKey: "landing.features.feat4.title",
+    descKey: "landing.features.feat4.desc",
+    defaultTitle: "Smart Booking",
+    defaultDesc: "Auto-fill slots with intelligent SMS/WhatsApp reminders, waitlists, and instant confirmations.",
     accent: "sky",
   },
   {
     icon: BarChart3,
-    title: "Practice Analytics",
-    desc: "Monitor consultation volumes, patient rating trends, and sentiment metrics in real-time.",
+    titleKey: "landing.features.feat5.title",
+    descKey: "landing.features.feat5.desc",
+    defaultTitle: "Practice Analytics",
+    defaultDesc: "Monitor consultation volumes, patient rating trends, and sentiment metrics in real-time.",
     accent: "emerald",
   },
   {
     icon: MessageSquareText,
-    title: "WhatsApp Hub",
-    desc: "A unified inbox for automated patient communications, broadcast follow-ups, and alerts.",
+    titleKey: "landing.features.feat6.title",
+    descKey: "landing.features.feat6.desc",
+    defaultTitle: "WhatsApp Hub",
+    defaultDesc: "A unified inbox for automated patient communications, broadcast follow-ups, and alerts.",
     accent: "green",
   },
 ];
 
 const steps = [
-  { num: "01", title: "Connect Channels", desc: "Link WhatsApp API, Google Business Profile, and Meta Pages in under 5 minutes.", icon: Layers },
-  { num: "02", title: "Enable AI Workflows", desc: "Activate triage assistant, automated review replies, and clinic booking calendars.", icon: Cpu },
-  { num: "03", title: "Grow on Autopilot", desc: "Run your clinical administration 24/7 while your team focuses entirely on patient care.", icon: TrendingUp },
+  { num: "01", titleKey: "landing.steps.step1.title", descKey: "landing.steps.step1.desc", defaultTitle: "Connect Channels", defaultDesc: "Link WhatsApp API, Google Business Profile, and Meta Pages in under 5 minutes.", icon: Layers },
+  { num: "02", titleKey: "landing.steps.step2.title", descKey: "landing.steps.step2.desc", defaultTitle: "Enable AI Workflows", defaultDesc: "Activate triage assistant, automated review replies, and clinic booking calendars.", icon: Cpu },
+  { num: "03", titleKey: "landing.steps.step3.title", descKey: "landing.steps.step3.desc", defaultTitle: "Grow on Autopilot", defaultDesc: "Run your clinical administration 24/7 while your team focuses entirely on patient care.", icon: TrendingUp },
 ];
 
 const plans = [
   {
-    name: "Starter",
-    price: "₹2,499",
-    desc: "Solo practitioners and small clinics.",
-    features: ["1 location", "AI Patient Chat (500 chats/mo)", "Google Maps Integration", "Basic Reviews Autopilot", "Smart Scheduling Interface"],
-    cta: "Start Free Trial",
+    nameKey: "landing.pricing.plan1.name",
+    defaultName: "Starter",
+    priceKey: "landing.pricing.plan1.price",
+    defaultPrice: "₹2,499",
+    descKey: "landing.pricing.plan1.desc",
+    defaultDesc: "Solo practitioners and small clinics.",
+    featureKeys: [
+      "landing.pricing.plan1.feat1",
+      "landing.pricing.plan1.feat2",
+      "landing.pricing.plan1.feat3",
+      "landing.pricing.plan1.feat4",
+      "landing.pricing.plan1.feat5",
+    ],
+    defaultFeatures: ["1 location", "AI Patient Chat (500 chats/mo)", "Google Maps Integration", "Basic Reviews Autopilot", "Smart Scheduling Interface"],
+    ctaKey: "landing.pricing.plan1.cta",
+    defaultCta: "Start Free Trial",
     featured: false,
   },
   {
-    name: "Growth",
-    price: "₹5,999",
-    desc: "Growing practices wanting full automated workflows.",
-    features: [
+    nameKey: "landing.pricing.plan2.name",
+    defaultName: "Growth",
+    priceKey: "landing.pricing.plan2.price",
+    defaultPrice: "₹5,999",
+    descKey: "landing.pricing.plan2.desc",
+    defaultDesc: "Growing practices wanting full automated workflows.",
+    featureKeys: [
+      "landing.pricing.plan2.feat1",
+      "landing.pricing.plan2.feat2",
+      "landing.pricing.plan2.feat3",
+      "landing.pricing.plan2.feat4",
+      "landing.pricing.plan2.feat5",
+      "landing.pricing.plan2.feat6",
+    ],
+    defaultFeatures: [
       "Up to 5 locations",
       "Unlimited AI Patient Chat",
       "WhatsApp Business API Integration",
@@ -119,45 +154,63 @@ const plans = [
       "Advanced Review Analytics & Auto-Replies",
       "Priority WhatsApp & Call Support",
     ],
-    cta: "Start Free Trial",
+    ctaKey: "landing.pricing.plan2.cta",
+    defaultCta: "Start Free Trial",
     featured: true,
   },
   {
-    name: "Enterprise",
-    price: "Custom Pricing",
-    desc: "Hospital chains and multi-city clinics.",
-    features: [
+    nameKey: "landing.pricing.plan3.name",
+    defaultName: "Enterprise",
+    priceKey: "landing.pricing.plan3.price",
+    defaultPrice: "Custom Pricing",
+    descKey: "landing.pricing.plan3.desc",
+    defaultDesc: "Hospital chains and multi-city clinics.",
+    featureKeys: [
+      "landing.pricing.plan3.feat1",
+      "landing.pricing.plan3.feat2",
+      "landing.pricing.plan3.feat3",
+      "landing.pricing.plan3.feat4",
+      "landing.pricing.plan3.feat5",
+    ],
+    defaultFeatures: [
       "Unlimited locations & sub-accounts",
       "Custom-trained AI models on clinical protocol",
       "SSO, SAML & EHR integrations",
       "Dedicated account success manager",
       "HIPAA Business Associate Agreement (BAA)",
     ],
-    cta: "Contact Sales",
+    ctaKey: "landing.pricing.plan3.cta",
+    defaultCta: "Contact Sales",
     featured: false,
   },
 ];
 
 const testimonials = [
   {
-    quote:
-      "Patient response workload dropped by 60%. Our staff now focuses on real patient care and clinical support.",
-    name: "Dr. Mehak Arora",
-    role: "CityCare Clinic · Mumbai",
+    quoteKey: "landing.testimonials.test1.quote",
+    defaultQuote: "Patient response workload dropped by 60%. Our staff now focuses on real patient care and clinical support.",
+    nameKey: "landing.testimonials.test1.name",
+    defaultName: "Dr. Mehak Arora",
+    roleKey: "landing.testimonials.test1.role",
+    defaultRole: "CityCare Clinic · Mumbai",
     initials: "MA",
   },
   {
-    quote:
-      "Review autopilot raised our Google Maps rating from 3.8 to 4.8 in just six weeks. Appointments have doubled.",
-    name: "Dr. Ritesh Jain",
-    role: "WellSpring Health · Delhi",
+    quoteKey: "landing.testimonials.test2.quote",
+    defaultQuote: "Review autopilot raised our Google Maps rating from 3.8 to 4.8 in just six weeks. Appointments have doubled.",
+    nameKey: "landing.testimonials.test2.name",
+    defaultName: "Dr. Ritesh Jain",
+    roleKey: "landing.testimonials.test2.role",
+    defaultRole: "WellSpring Health · Delhi",
     initials: "RJ",
   },
   {
-    quote:
-      "We launched the AI chatbot in one day, and automated WhatsApp confirmations started filling slots right away.",
-    name: "Dr. Aviral Singh",
-    role: "PrimeSkin · Bangalore",
+    quoteKey: "landing.testimonials.test3.quote",
+    defaultQuote: "We launched the AI chatbot in one day, and automated WhatsApp confirmations started filling slots right away.",
+    nameKey: "landing.testimonials.test3.name",
+    defaultName: "Dr. Aviral Singh",
+    roleKey: "landing.testimonials.test3.role",
+    defaultRole: "PrimeSkin · Bangalore",
     initials: "AS",
   },
 ];
@@ -206,24 +259,34 @@ const featureAccent: Record<
 
 const faqs = [
   {
-    q: "How long does it take to set up ClinicSuite?",
-    a: "Most clinics go live in under 5 minutes. No coding or developer support is required.",
+    qKey: "landing.faq.q1",
+    defaultQ: "How long does it take to set up ClinicSuite?",
+    aKey: "landing.faq.a1",
+    defaultA: "Most clinics go live in under 5 minutes. No coding or developer support is required.",
   },
   {
-    q: "Will ClinicSuite integrate with our existing booking system?",
-    a: "Yes. ClinicSuite connects to standard CRM and EHR tools through APIs and webhooks.",
+    qKey: "landing.faq.q2",
+    defaultQ: "Will ClinicSuite integrate with our existing booking system?",
+    aKey: "landing.faq.a2",
+    defaultA: "Yes. ClinicSuite connects to standard CRM and EHR tools through APIs and webhooks.",
   },
   {
-    q: "Which languages does the AI chatbot support?",
-    a: "Hindi, English, Hinglish, and 10+ regional Indian languages (Bengali, Tamil, Telugu, and more), with automatic language detection.",
+    qKey: "landing.faq.q3",
+    defaultQ: "Which languages does the AI chatbot support?",
+    aKey: "landing.faq.a3",
+    defaultA: "Hindi, English, Hinglish, and 10+ regional Indian languages (Bengali, Tamil, Telugu, and more), with automatic language detection.",
   },
   {
-    q: "Is our patient data secure?",
-    a: "Yes. ClinicSuite follows HIPAA-aligned security practices. Your data is encrypted in transit and at rest with 256-bit encryption on AWS India servers.",
+    qKey: "landing.faq.q4",
+    defaultQ: "Is our patient data secure?",
+    aKey: "landing.faq.a4",
+    defaultA: "Yes. ClinicSuite follows HIPAA-aligned security practices. Your data is encrypted in transit and at rest with 256-bit encryption on AWS India servers.",
   },
   {
-    q: "Do I need a credit card for the free trial?",
-    a: "No. The 14-day trial is completely free — no credit card required.",
+    qKey: "landing.faq.q5",
+    defaultQ: "Do I need a credit card for the free trial?",
+    aKey: "landing.faq.a5",
+    defaultA: "No. The 14-day trial is completely free — no credit card required.",
   },
 ];
 
@@ -271,25 +334,26 @@ function SectionBadge({ children, className }: { children: React.ReactNode; clas
 }
 
 function InteractiveHeroMockup() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"stats" | "logs">("stats");
-  const [ticks, setTicks] = useState<Array<{ id: number; text: string; time: string; type: string }>>([
-    { id: 1, text: "AI replied to Dr. Arora's Google Review", time: "Just now", type: "review" },
-    { id: 2, text: "WhatsApp booking confirmed: Ortho slot", time: "2m ago", type: "booking" },
-    { id: 3, text: "Video Reel generated: 'Preventing Joint Pain'", time: "6m ago", type: "video" },
+  const [ticks, setTicks] = useState<Array<{ id: number; textKey: string; defaultText: string; timeKey: string; defaultTime: string; type: string }>>([
+    { id: 1, textKey: "landing.hero.mock.event1", defaultText: "AI replied to Dr. Arora's Google Review", timeKey: "landing.hero.mock.justNow", defaultTime: "Just now", type: "review" },
+    { id: 2, textKey: "landing.hero.mock.event2", defaultText: "WhatsApp booking confirmed: Ortho slot", timeKey: "landing.hero.mock.2mAgo", defaultTime: "2m ago", type: "booking" },
+    { id: 3, textKey: "landing.hero.mock.event3", defaultText: "Video Reel generated: 'Preventing Joint Pain'", timeKey: "landing.hero.mock.6mAgo", defaultTime: "6m ago", type: "video" },
   ]);
 
   // Add mock events over time
   useEffect(() => {
     const interval = setInterval(() => {
       const messages = [
-        { text: "AI automated patient triage query (Hinglish)", type: "chat" },
-        { text: "New 5★ Google Map review synced", type: "review" },
-        { text: "WhatsApp confirmation sent to patient Rohan", type: "booking" },
-        { text: "AI Video Studio script compiled successfully", type: "video" },
+        { textKey: "landing.hero.mock.chatEvent", defaultText: "AI automated patient triage query (Hinglish)", type: "chat" },
+        { textKey: "landing.hero.mock.reviewEvent", defaultText: "New 5★ Google Map review synced", type: "review" },
+        { textKey: "landing.hero.mock.bookingEvent", defaultText: "WhatsApp confirmation sent to patient Rohan", type: "booking" },
+        { textKey: "landing.hero.mock.videoEvent", defaultText: "AI Video Studio script compiled successfully", type: "video" },
       ];
       const randomMsg = messages[Math.floor(Math.random() * messages.length)];
       setTicks((prev) => [
-        { id: Date.now(), text: randomMsg.text, time: "Just now", type: randomMsg.type },
+        { id: Date.now(), textKey: randomMsg.textKey, defaultText: randomMsg.defaultText, timeKey: "landing.hero.mock.justNow", defaultTime: "Just now", type: randomMsg.type },
         ...prev.slice(0, 4),
       ]);
     }, 4500);
@@ -310,7 +374,7 @@ function InteractiveHeroMockup() {
         </div>
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Autopilot Active</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">{t("landing.hero.automated", "Autopilot Active")}</span>
         </div>
       </div>
 
@@ -318,12 +382,12 @@ function InteractiveHeroMockup() {
         <aside className="w-full shrink-0 border-r border-slate-200 bg-slate-50/80 p-4 md:w-44">
           <div className="space-y-1">
             {[
-              { label: "Overview", icon: Layers, active: true },
-              { label: "Patient Chat", icon: Bot, count: "5" },
-              { label: "Video Studio", icon: Video },
-              { label: "Reviews Feed", icon: Star },
-              { label: "Consultations", icon: CalendarCheck2 },
-              { label: "Analytics", icon: BarChart3 },
+              { label: t("landing.hero.mock.overview", "Overview"), icon: Layers, active: true },
+              { label: t("landing.hero.mock.patientChat", "Patient Chat"), icon: Bot, count: "5" },
+              { label: t("landing.hero.mock.videoStudio", "Video Studio"), icon: Video },
+              { label: t("landing.hero.mock.reviewsFeed", "Reviews Feed"), icon: Star },
+              { label: t("landing.hero.mock.consultations", "Consultations"), icon: CalendarCheck2 },
+              { label: t("landing.hero.mock.analytics", "Analytics"), icon: BarChart3 },
             ].map((item) => (
               <div
                 key={item.label}
@@ -356,7 +420,7 @@ function InteractiveHeroMockup() {
                   activeTab === "stats" ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
                 )}
               >
-                Live Metrics
+                {t("landing.hero.liveMetrics", "Live Metrics")}
               </button>
               <button
                 onClick={() => setActiveTab("logs")}
@@ -365,19 +429,19 @@ function InteractiveHeroMockup() {
                   activeTab === "logs" ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
                 )}
               >
-                Live Ticker
+                {t("landing.hero.liveTicker", "Live Ticker")}
               </button>
             </div>
-            <span className="text-[10px] font-bold text-slate-500">Sync: Realtime 1s</span>
+            <span className="text-[10px] font-bold text-slate-500">{t("landing.hero.syncRealtime", "Sync: Realtime 1s")}</span>
           </div>
 
           {activeTab === "stats" ? (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { label: "Consults", val: "1,482", trend: "+14%", color: "text-teal-600" },
-                  { label: "AI Replies", val: "842", trend: "+41%", color: "text-violet-600" },
-                  { label: "Google Rating", val: "4.8★", trend: "+0.4", color: "text-amber-600" },
+                  { label: t("landing.hero.mock.consultsLabel", "Consults"), val: "1,482", trend: "+14%", color: "text-teal-600" },
+                  { label: t("landing.hero.mock.aiRepliesLabel", "AI Replies"), val: "842", trend: "+41%", color: "text-violet-600" },
+                  { label: t("landing.hero.mock.googleRatingLabel", "Google Rating"), val: "4.8★", trend: "+0.4", color: "text-amber-600" },
                 ].map((s) => (
                   <div key={s.label} className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">{s.label}</p>
@@ -389,8 +453,8 @@ function InteractiveHeroMockup() {
 
               <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Weekly Patient Growth</p>
-                  <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[9px] font-bold text-teal-700">Automated</span>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{t("landing.hero.weeklyGrowth", "Weekly Patient Growth")}</p>
+                  <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[9px] font-bold text-teal-700">{t("landing.hero.automated", "Automated")}</span>
                 </div>
                 <div className="relative h-20 w-full pt-2">
                   <svg className="h-full w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
@@ -421,18 +485,18 @@ function InteractiveHeroMockup() {
                     <circle cx="100" cy="5" r="3" fill="#2dd4bf" className="animate-ping" />
                   </svg>
                   <div className="absolute top-1 right-2 rounded border border-slate-200 bg-white px-1 py-0.5 text-[8px] font-black text-slate-600 shadow-sm">
-                    Week 4: +280 Patients
+                    {t("landing.hero.week4Patients", "Week 4: +280 Patients")}
                   </div>
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Live Autopilot Events</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">{t("landing.hero.liveAutopilotEvents", "Live Autopilot Events")}</p>
               <AnimatePresence initial={false}>
-                {ticks.map((t, idx) => (
+                {ticks.map((tItem, idx) => (
                   <motion.div
-                    key={t.id}
+                    key={tItem.id}
                     initial={{ opacity: 0, y: -8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 12, height: 0, overflow: "hidden", margin: 0, padding: 0 }}
@@ -447,17 +511,17 @@ function InteractiveHeroMockup() {
                     <span
                       className={cn(
                         "h-1.5 w-1.5 shrink-0 rounded-full",
-                        t.type === "review"
+                        tItem.type === "review"
                           ? "bg-amber-400 animate-pulse"
-                          : t.type === "booking"
+                          : tItem.type === "booking"
                           ? "bg-teal-400"
-                          : t.type === "video"
+                          : tItem.type === "video"
                           ? "bg-violet-400"
                           : "bg-emerald-400"
                       )}
                     />
-                    <span className="flex-1 font-medium">{t.text}</span>
-                    <span className="font-bold text-slate-500">{t.time}</span>
+                    <span className="flex-1 font-medium">{t(tItem.textKey, tItem.defaultText)}</span>
+                    <span className="font-bold text-slate-500">{t(tItem.timeKey, tItem.defaultTime)}</span>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -471,6 +535,7 @@ function InteractiveHeroMockup() {
 
 export function LandingPage() {
   const router = useRouter();
+  const { language, setLanguage, t } = useLanguage();
   const reduceMotion = useReducedMotion();
   const scrolled = useNavScroll();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -543,90 +608,105 @@ export function LandingPage() {
 
   // ROI calculations mapping
   const roiCalculations = {
-    single: { hours: "12 hours/wk", consults: "+15 new consults/mo", reviews: "+35 reviews/mo", savings: "₹15,000/mo" },
-    multi: { hours: "28 hours/wk", consults: "+48 new consults/mo", reviews: "+90 reviews/mo", savings: "₹48,000/mo" },
-    chain: { hours: "75+ hours/wk", consults: "+160+ new consults/mo", reviews: "+280 reviews/mo", savings: "₹1,35,000/mo" },
+    single: {
+      hours: t("landing.roi.single.hours", "12 hours/wk"),
+      consults: t("landing.roi.single.consults", "+15 new consults/mo"),
+      reviews: t("landing.roi.single.reviews", "+35 reviews/mo"),
+      savings: t("landing.roi.single.savings", "₹15,000/mo"),
+    },
+    multi: {
+      hours: t("landing.roi.multi.hours", "28 hours/wk"),
+      consults: t("landing.roi.multi.consults", "+48 new consults/mo"),
+      reviews: t("landing.roi.multi.reviews", "+90 reviews/mo"),
+      savings: t("landing.roi.multi.savings", "₹48,000/mo"),
+    },
+    chain: {
+      hours: t("landing.roi.chain.hours", "75+ hours/wk"),
+      consults: t("landing.roi.chain.consults", "+160+ new consults/mo"),
+      reviews: t("landing.roi.chain.reviews", "+280 reviews/mo"),
+      savings: t("landing.roi.chain.savings", "₹1,35,000/mo"),
+    },
   };
 
   // Feature Showcase previews details
   const showcaseTabs = [
     {
-      title: "AI Patient Chatbot",
-      badge: "WhatsApp & Web",
-      tagline: "Engage and triage patients automatically 24/7.",
+      title: t("landing.showcase.tab1.title", "AI Patient Chatbot"),
+      badge: t("landing.showcase.tab1.badge", "WhatsApp & Web"),
+      tagline: t("landing.showcase.tab1.tagline", "Engage and triage patients automatically 24/7."),
       bullets: [
-        "Instantly answers clinical FAQs and consultation timings.",
-        "Detects patient intent in Hindi, English, and Hinglish.",
-        "Captures details and schedules slot bookings automatically.",
+        t("landing.showcase.tab1.bullet1", "Instantly answers clinical FAQs and consultation timings."),
+        t("landing.showcase.tab1.bullet2", "Detects patient intent in Hindi, English, and Hinglish."),
+        t("landing.showcase.tab1.bullet3", "Captures details and schedules slot bookings automatically."),
       ],
       mockup: (
         <div className="rounded-2xl border border-slate-800 bg-[#050914] p-4 text-slate-100 shadow-inner">
           <div className="flex items-center gap-2 border-b border-slate-900 pb-3 mb-3">
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-500 text-[10px] font-black text-white">WA</div>
             <div>
-              <p className="text-xs font-bold leading-none">CityCare AI Triage</p>
-              <span className="text-[9px] font-bold text-teal-400">Online · Verification Active</span>
+              <p className="text-xs font-bold leading-none">{t("landing.showcase.tab1.mock.title", "CityCare AI Triage")}</p>
+              <span className="text-[9px] font-bold text-teal-400">{t("landing.showcase.tab1.mock.status", "Online · Verification Active")}</span>
             </div>
           </div>
           <div className="space-y-3.5">
             <div className="max-w-[85%] rounded-2xl bg-slate-900 px-3 py-2 text-left">
-              <p className="text-[10px] font-bold text-slate-500 mb-0.5">Patient · 10:14 AM</p>
-              <p className="text-xs text-slate-200">Hi, kya Dr. Arora skin allergy ke liye available hain aaj? Mujhe severe itching ho rahi hai.</p>
+              <p className="text-[10px] font-bold text-slate-500 mb-0.5">{t("landing.showcase.tab1.mock.patientLabel", "Patient")} · 10:14 AM</p>
+              <p className="text-xs text-slate-200">{t("landing.showcase.tab1.mock.patientMsg1", "Hi, kya Dr. Arora skin allergy ke liye available hain aaj? Mujhe severe itching ho rahi hai.")}</p>
             </div>
             <div className="ml-auto max-w-[85%] rounded-2xl bg-teal-950 border border-teal-500/25 px-3 py-2 text-left">
-              <p className="text-[10px] font-bold text-teal-400 mb-0.5">ClinicSuite Assistant · 10:14 AM</p>
-              <p className="text-xs text-teal-100">Namaste! Yes, Dr. Arora (Dermatologist) available hain. Unka clinic consultation fee ₹500 hai. Humare paas aaj do vacant slots hain:</p>
+              <p className="text-[10px] font-bold text-teal-400 mb-0.5">{t("landing.showcase.tab1.mock.assistantLabel", "ClinicSuite Assistant")} · 10:14 AM</p>
+              <p className="text-xs text-teal-100">{t("landing.showcase.tab1.mock.assistantMsg1", "Namaste! Yes, Dr. Arora (Dermatologist) available hain. Unka clinic consultation fee ₹500 hai. Humare paas aaj do vacant slots hain:")}</p>
               <div className="mt-2 flex gap-1.5">
-                <span className="rounded bg-teal-800/80 border border-teal-400/30 px-2 py-1 text-[9px] font-bold text-white">4:30 PM today</span>
-                <span className="rounded bg-teal-800/80 border border-teal-400/30 px-2 py-1 text-[9px] font-bold text-white">6:00 PM today</span>
+                <span className="rounded bg-teal-800/80 border border-teal-400/30 px-2 py-1 text-[9px] font-bold text-white">{t("landing.showcase.tab1.mock.slot1", "4:30 PM today")}</span>
+                <span className="rounded bg-teal-800/80 border border-teal-400/30 px-2 py-1 text-[9px] font-bold text-white">{t("landing.showcase.tab1.mock.slot2", "6:00 PM today")}</span>
               </div>
             </div>
             <div className="max-w-[85%] rounded-2xl bg-slate-900 px-3 py-2 text-left">
-              <p className="text-[10px] font-bold text-slate-500 mb-0.5">Patient · 10:15 AM</p>
-              <p className="text-xs text-slate-200">4:30 PM standard patient slot book kar dijiye checkup ke liye.</p>
+              <p className="text-[10px] font-bold text-slate-500 mb-0.5">{t("landing.showcase.tab1.mock.patientLabel", "Patient")} · 10:15 AM</p>
+              <p className="text-xs text-slate-200">{t("landing.showcase.tab1.mock.patientMsg2", "4:30 PM standard patient slot book kar dijiye checkup ke liye.")}</p>
             </div>
             <div className="ml-auto max-w-[85%] rounded-2xl bg-teal-950 border border-teal-500/25 px-3 py-2 text-left">
-              <p className="text-[10px] font-bold text-teal-400 mb-0.5">ClinicSuite Assistant · 10:15 AM</p>
-              <p className="text-xs text-teal-100">Great! 4:30 PM slot select ho gaya hai. Aapki appointment confirm karne ke liye please is link pe click karein ya reply confirm karein.</p>
+              <p className="text-[10px] font-bold text-teal-400 mb-0.5">{t("landing.showcase.tab1.mock.assistantLabel", "ClinicSuite Assistant")} · 10:15 AM</p>
+              <p className="text-xs text-teal-100">{t("landing.showcase.tab1.mock.assistantMsg2", "Great! 4:30 PM slot select ho gaya hai. Aapki appointment confirm karne ke liye please is link pe click karein ya reply confirm karein.")}</p>
             </div>
           </div>
         </div>
       ),
     },
     {
-      title: "AI Video Studio",
-      badge: "YouTube & Instagram",
-      tagline: "Generate short medical educational videos in 1 click.",
+      title: t("landing.showcase.tab2.title", "AI Video Studio"),
+      badge: t("landing.showcase.tab2.badge", "YouTube & Instagram"),
+      tagline: t("landing.showcase.tab2.tagline", "Generate short medical educational videos in 1 click."),
       bullets: [
-        "Write simple topics, AI drafts clinical scripts in Hinglish.",
-        "Voice generator compiles professional narrations.",
-        "Auto-generate visual captions matching speech pacing.",
+        t("landing.showcase.tab2.bullet1", "Write simple topics, AI drafts clinical scripts in Hinglish."),
+        t("landing.showcase.tab2.bullet2", "Voice generator compiles professional narrations."),
+        t("landing.showcase.tab2.bullet3", "Auto-generate visual captions matching speech pacing."),
       ],
       mockup: (
         <div className="rounded-2xl border border-slate-800 bg-[#050914] p-4 text-slate-100 shadow-inner">
           <div className="grid gap-3 sm:grid-cols-2">
             {/* Control Panel */}
             <div className="space-y-2 text-left">
-              <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">AI Script Builder</p>
+              <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">{t("landing.showcase.tab2.mock.builder", "AI Script Builder")}</p>
               <div className="rounded-lg bg-slate-900 border border-slate-800 p-2.5">
-                <p className="text-[9px] font-bold text-teal-400 uppercase tracking-widest">Topic</p>
-                <p className="text-xs font-bold text-white mt-0.5">3 Tips to Manage Hypertension</p>
+                <p className="text-[9px] font-bold text-teal-400 uppercase tracking-widest">{t("landing.showcase.tab2.mock.topic", "Topic")}</p>
+                <p className="text-xs font-bold text-white mt-0.5">{t("landing.showcase.tab2.mock.topicValue", "3 Tips to Manage Hypertension")}</p>
               </div>
               <div className="rounded-lg bg-slate-900 border border-slate-800 p-2.5">
-                <p className="text-[9px] font-bold text-violet-400 uppercase tracking-widest">Drafted Audio Script</p>
+                <p className="text-[9px] font-bold text-violet-400 uppercase tracking-widest">{t("landing.showcase.tab2.mock.draftedAudio", "Drafted Audio Script")}</p>
                 <p className="text-[11px] leading-relaxed text-slate-300 mt-1">
-                  "Doston, hyper tension control karna koi muskil kaam nahi. Sabse pehle, daily minimum 30 minutes walk start kijiye. Dusra, salt intake decrease kijiye..."
+                  {t("landing.showcase.tab2.mock.scriptValue", "\"Doston, hyper tension control karna koi muskil kaam nahi. Sabse pehle, daily minimum 30 minutes walk start kijiye. Dusra, salt intake decrease kijiye...\"")}
                 </p>
               </div>
               <span className="inline-flex items-center gap-1 rounded bg-teal-500/20 px-2 py-0.5 text-[9px] font-black text-teal-300">
-                <Volume2 size={10} /> Hinglish Voice: Dr. Male 1
+                <Volume2 size={10} /> {t("landing.showcase.tab2.mock.voice", "Hinglish Voice: Dr. Male 1")}
               </span>
             </div>
             {/* Visual Shorts Bezel */}
             <div className="relative mx-auto h-[220px] w-[130px] rounded-xl border-4 border-slate-800 bg-slate-950 overflow-hidden flex flex-col justify-between p-2 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent z-10" />
               <div className="relative flex justify-between items-center z-20">
-                <span className="text-[8px] font-bold text-teal-400">ClinicSuite Studio</span>
+                <span className="text-[8px] font-bold text-teal-400">{t("landing.showcase.tab2.mock.studio", "ClinicSuite Studio")}</span>
                 <span className="text-[8px] text-white/50">9:16</span>
               </div>
               {/* Fake Video Backdrop Graphics */}
@@ -639,10 +719,10 @@ export function LandingPage() {
               </div>
               {/* Dynamic Captions overlay */}
               <div className="relative text-center z-20 pb-2">
-                <p className="bg-teal-500 text-slate-950 text-[10px] font-black tracking-wide uppercase px-1.5 py-0.5 rounded inline-block shadow-lg">
-                  SALT INTAKE DECREASE
+                <p className="bg-teal-50 text-slate-950 text-[10px] font-black tracking-wide uppercase px-1.5 py-0.5 rounded inline-block shadow-lg">
+                  {t("landing.showcase.tab2.mock.caption", "SALT INTAKE DECREASE")}
                 </p>
-                <p className="text-[8px] font-bold text-slate-200 mt-1">Control Hypertension</p>
+                <p className="text-[8px] font-bold text-slate-200 mt-1">{t("landing.showcase.tab2.mock.videoTitle", "Control Hypertension")}</p>
               </div>
             </div>
           </div>
@@ -650,27 +730,27 @@ export function LandingPage() {
       ),
     },
     {
-      title: "Google Review Autopilot",
-      badge: "SEO Rating Booster",
-      tagline: "Autopilot patient responses and reviews growth.",
+      title: t("landing.showcase.tab3.title", "Google Review Autopilot"),
+      badge: t("landing.showcase.tab3.badge", "SEO Rating Booster"),
+      tagline: t("landing.showcase.tab3.tagline", "Autopilot patient responses and reviews growth."),
       bullets: [
-        "Syncs Google Business Profile and Facebook Reviews live.",
-        "Generates HIPAA-compliant drafted replies with zero medical hazard.",
-        "Reduces average reply time from 4 days to under 60 seconds.",
+        t("landing.showcase.tab3.bullet1", "Syncs Google Business Profile and Facebook Reviews live."),
+        t("landing.showcase.tab3.bullet2", "Generates HIPAA-compliant drafted replies with zero medical hazard."),
+        t("landing.showcase.tab3.bullet3", "Reduces average reply time from 4 days to under 60 seconds."),
       ],
       mockup: (
         <div className="rounded-2xl border border-slate-800 bg-[#050914] p-4 text-slate-100 shadow-inner text-left">
           <div className="mb-3 flex justify-between items-center border-b border-slate-900 pb-2">
-            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">Google Business Reviews</span>
-            <span className="text-[10px] text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded-full">Automated Mode</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">{t("landing.showcase.tab3.mock.title", "Google Business Reviews")}</span>
+            <span className="text-[10px] text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded-full">{t("landing.showcase.tab3.mock.mode", "Automated Mode")}</span>
           </div>
           <div className="rounded-xl bg-slate-900 border border-slate-800/80 p-3 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="h-6 w-6 rounded-full bg-teal-500/20 text-[10px] font-black flex items-center justify-center text-teal-300">VK</div>
                 <div>
-                  <h4 className="text-xs font-bold leading-none">Vinay Kapoor</h4>
-                  <span className="text-[9px] text-slate-500">Google Reviewer · 3h ago</span>
+                  <h4 className="text-xs font-bold leading-none">{t("landing.showcase.tab3.mock.reviewer", "Vinay Kapoor")}</h4>
+                  <span className="text-[9px] text-slate-500">{t("landing.showcase.tab3.mock.reviewTime", "Google Reviewer · 3h ago")}</span>
                 </div>
               </div>
               <div className="flex text-amber-400 gap-0.5">
@@ -680,15 +760,15 @@ export function LandingPage() {
               </div>
             </div>
             <p className="text-[11px] leading-relaxed text-slate-300">
-              "Great doctor! Consultation details were precise and waiting hours was very low. The digital check-in on WhatsApp saved us so much time."
+              {t("landing.showcase.tab3.mock.reviewText", "\"Great doctor! Consultation details were precise and waiting hours was very low. The digital check-in on WhatsApp saved us so much time.\"")}
             </p>
             <div className="mt-2 rounded-lg bg-teal-950/60 border border-teal-500/20 p-2.5">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[8px] font-black uppercase tracking-widest text-teal-400">ClinicSuite Auto-Reply</span>
-                <span className="text-[8px] bg-teal-500 text-slate-950 font-extrabold px-1.5 rounded">Published</span>
+                <span className="text-[8px] font-black uppercase tracking-widest text-teal-400">{t("landing.showcase.tab3.mock.replyTitle", "ClinicSuite Auto-Reply")}</span>
+                <span className="text-[8px] bg-teal-500 text-slate-950 font-extrabold px-1.5 rounded">{t("landing.showcase.tab3.mock.replyStatus", "Published")}</span>
               </div>
               <p className="text-[10px] text-teal-200">
-                "Hello Vinay, thank you for sharing your feedback! We are thrilled to know our digital WhatsApp bookings check-in helped save your time. We look forward to supporting your healthcare requirements."
+                {t("landing.showcase.tab3.mock.replyText", "\"Hello Vinay, thank you for sharing your feedback! We are thrilled to know our digital WhatsApp bookings check-in helped save your time. We look forward to supporting your healthcare requirements.\"")}
               </p>
             </div>
           </div>
@@ -696,43 +776,43 @@ export function LandingPage() {
       ),
     },
     {
-      title: "WhatsApp Booking Hub",
-      badge: "Confirmations & Reminders",
-      tagline: "Keep patient slots booked and reduce drop-offs by 85%.",
+      title: t("landing.showcase.tab4.title", "WhatsApp Booking Hub"),
+      badge: t("landing.showcase.tab4.badge", "Confirmations & Reminders"),
+      tagline: t("landing.showcase.tab4.tagline", "Keep patient slots booked and reduce drop-offs by 85%."),
       bullets: [
-        "Sends proactive calendar booking reminders automatically.",
-        "Allows patients to reschedule easily inside conversational chat.",
-        "Smart waitlist engine refills cancelled timings instantly.",
+        t("landing.showcase.tab4.bullet1", "Sends proactive calendar booking reminders automatically."),
+        t("landing.showcase.tab4.bullet2", "Allows patients to reschedule easily inside conversational chat."),
+        t("landing.showcase.tab4.bullet3", "Smart waitlist engine refills cancelled timings instantly."),
       ],
       mockup: (
         <div className="rounded-2xl border border-slate-800 bg-[#050914] p-4 text-slate-100 shadow-inner text-left">
           <div className="mb-3 flex justify-between items-center border-b border-slate-900 pb-2">
-            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">WhatsApp Notification Hub</span>
-            <span className="text-[10px] text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded-full">Automation Live</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">{t("landing.showcase.tab4.mock.title", "WhatsApp Notification Hub")}</span>
+            <span className="text-[10px] text-teal-400 font-bold bg-teal-500/10 px-2 py-0.5 rounded-full">{t("landing.showcase.tab4.mock.mode", "Automation Live")}</span>
           </div>
           <div className="space-y-3">
             {/* Event 1 */}
             <div className="flex items-start gap-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 p-2 text-xs">
               <span className="h-1.5 w-1.5 rounded-full bg-teal-400 mt-1.5 shrink-0" />
               <div>
-                <p className="font-bold text-slate-200">Appointment Reminder Triggered</p>
-                <p className="text-[10px] text-slate-400">Sent to patient Priya Sharma for 3:00 PM Dermatologist consult.</p>
+                <p className="font-bold text-slate-200">{t("landing.showcase.tab4.mock.event1Title", "Appointment Reminder Triggered")}</p>
+                <p className="text-[10px] text-slate-400">{t("landing.showcase.tab4.mock.event1Text", "Sent to patient Priya Sharma for 3:00 PM Dermatologist consult.")}</p>
               </div>
             </div>
             {/* Event 2 */}
             <div className="flex items-start gap-2.5 rounded-lg bg-teal-950/40 border border-teal-500/25 p-2 text-xs">
               <span className="h-1.5 w-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0" />
               <div>
-                <p className="font-bold text-teal-300">Appointment Confirmed by Patient</p>
-                <p className="text-[10px] text-teal-200">Priya Sharma replied: "CONFIRM" via WhatsApp. Calendar updated.</p>
+                <p className="font-bold text-teal-300">{t("landing.showcase.tab4.mock.event2Title", "Appointment Confirmed by Patient")}</p>
+                <p className="text-[10px] text-teal-200">{t("landing.showcase.tab4.mock.event2Text", "Priya Sharma replied: \"CONFIRM\" via WhatsApp. Calendar updated.")}</p>
               </div>
             </div>
             {/* Event 3 */}
             <div className="flex items-start gap-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80 p-2 text-xs">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
               <div>
-                <p className="font-bold text-slate-200">Waitlist Alert Dispatched</p>
-                <p className="text-[10px] text-slate-400">Slot at 5:30 PM was cancelled. 3 waitlisted patients alerted on WhatsApp.</p>
+                <p className="font-bold text-slate-200">{t("landing.showcase.tab4.mock.event3Title", "Waitlist Alert Dispatched")}</p>
+                <p className="text-[10px] text-slate-400">{t("landing.showcase.tab4.mock.event3Text", "Slot at 5:30 PM was cancelled. 3 waitlisted patients alerted on WhatsApp.")}</p>
               </div>
             </div>
           </div>
@@ -758,36 +838,64 @@ export function LandingPage() {
           <nav className="hidden items-center gap-1 rounded-full border border-slate-200 bg-white/80 p-1 text-sm font-semibold text-slate-600 shadow-sm md:flex">
             {navLinks.map((l) => (
               <a
-                key={l.label}
+                key={l.labelKey}
                 href={l.href}
                 className="nav-link rounded-full px-3.5 py-2 transition hover:bg-slate-100 hover:text-teal-700"
               >
-                {l.label}
+                {t(l.labelKey, l.defaultLabel)}
               </a>
             ))}
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
+            {/* Language Selector Dropdown */}
+            <div className="relative">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                className="cursor-pointer rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 outline-none hover:border-teal-300 hover:text-teal-600 shadow-sm"
+              >
+                <option value="en">🇬🇧 EN</option>
+                <option value="hi">🇮🇳 HI</option>
+                <option value="de">🇩🇪 DE</option>
+              </select>
+            </div>
+
             <a href="/auth" className="text-sm font-semibold text-slate-600 transition hover:text-slate-900">
-              Sign in
+              {t("landing.nav.signin", "Sign in")}
             </a>
             <a
               href="/auth"
               className="landing-btn-primary btn-shine ring-pulse rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-teal-600/25 transition hover:brightness-110"
             >
-              Start free trial
+              {t("landing.nav.starttrial", "Start free trial")}
             </a>
           </div>
 
-          <button
-            type="button"
-            className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:bg-slate-50 md:hidden"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-expanded={menuOpen}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-          >
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            {/* Language Selector Dropdown for Mobile */}
+            <div className="relative">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                className="cursor-pointer rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-xs font-bold text-slate-700 outline-none hover:border-teal-300 hover:text-teal-600 shadow-sm"
+              >
+                <option value="en">🇬🇧 EN</option>
+                <option value="hi">🇮🇳 HI</option>
+                <option value="de">🇩🇪 DE</option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:bg-slate-50"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+            >
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -837,30 +945,44 @@ export function LandingPage() {
                   <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-4">
                     {navLinks.map((l) => (
                       <a
-                        key={l.label}
+                        key={l.labelKey}
                         href={l.href}
                         onClick={() => setMenuOpen(false)}
                         className="rounded-xl border border-transparent px-4 py-3.5 text-base font-semibold text-slate-800 transition hover:border-slate-200 hover:bg-slate-50 hover:text-teal-700 active:bg-teal-50"
                       >
-                        {l.label}
+                        {t(l.labelKey, l.defaultLabel)}
                       </a>
                     ))}
                   </nav>
 
                   <div className="space-y-3 border-t border-slate-200 px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                    {/* Mobile Language Selector */}
+                    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2">
+                      <span className="text-xs font-bold text-slate-500">Language / भाषा / Sprache</span>
+                      <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value as Language)}
+                        className="cursor-pointer bg-transparent text-xs font-bold text-slate-700 outline-none hover:text-teal-600"
+                      >
+                        <option value="en">🇬🇧 English</option>
+                        <option value="hi">🇮🇳 हिंदी</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                      </select>
+                    </div>
+
                     <a
                       href="/auth"
                       onClick={() => setMenuOpen(false)}
                       className="block rounded-xl py-3 text-center text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
                     >
-                      Sign in
+                      {t("landing.nav.signin", "Sign in")}
                     </a>
                     <a
                       href="/auth"
                       onClick={() => setMenuOpen(false)}
                       className="landing-btn-primary btn-shine block rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-teal-600/20"
                     >
-                      Start free trial
+                      {t("landing.nav.starttrial", "Start free trial")}
                     </a>
                   </div>
                 </motion.div>
@@ -890,16 +1012,16 @@ export function LandingPage() {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-400" />
                 </span>
                 <Sparkles size={12} className="text-teal-600" />
-                Next-gen clinic automation
+                {t("landing.hero.badge", "Next-gen clinic automation")}
               </SectionBadge>
 
               <h1 className="landing-section-title mt-6 text-[clamp(2.5rem,5vw,4rem)] font-extrabold">
-                Run your practice on{" "}
-                <span className="gradient-text-animated">intelligent autopilot</span>
+                {t("landing.hero.titlePart1", "Run your practice on")}{" "}
+                <span className="gradient-text-animated">{t("landing.hero.titleHighlight", "intelligent autopilot")}</span>
               </h1>
 
               <p className="mt-6 max-w-xl text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
-                Automate patient triage, follow-ups, Google reviews, booking confirmations, and health content — built for modern Indian clinics.
+                {t("landing.hero.subtitle", "Automate patient triage, follow-ups, Google reviews, booking confirmations, and health content — built for modern Indian clinics.")}
               </p>
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -907,7 +1029,7 @@ export function LandingPage() {
                   href="/auth"
                   className="landing-btn-primary btn-shine group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 px-8 py-4 text-sm font-bold text-white shadow-xl shadow-teal-600/20 transition hover:brightness-110"
                 >
-                  Start free trial — 14 days
+                  {t("landing.hero.ctaStart", "Start free trial — 14 days")}
                   <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
                 </a>
                 <a
@@ -915,19 +1037,19 @@ export function LandingPage() {
                   className="landing-glass inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-sm font-bold text-slate-800 transition hover:border-teal-300"
                 >
                   <CirclePlay size={16} className="text-teal-600" />
-                  Watch product tour
+                  {t("landing.hero.ctaTour", "Watch product tour")}
                 </a>
               </div>
 
               <div className="mt-10 flex flex-wrap gap-2.5">
                 {[
-                  { icon: Shield, label: "HIPAA aligned" },
-                  { icon: CheckCircle2, label: "No card required" },
-                  { icon: Zap, label: "Live in 5 minutes" },
-                ].map(({ icon: Icon, label }) => (
-                  <span key={label} className="landing-chip">
+                  { icon: Shield, labelKey: "landing.hero.chipHipaa", defaultLabel: "HIPAA aligned" },
+                  { icon: CheckCircle2, labelKey: "landing.hero.chipNoCard", defaultLabel: "No card required" },
+                  { icon: Zap, labelKey: "landing.hero.chipTime", defaultLabel: "Live in 5 minutes" },
+                ].map(({ icon: Icon, labelKey, defaultLabel }) => (
+                  <span key={labelKey} className="landing-chip">
                     <Icon size={13} className="text-teal-600" />
-                    {label}
+                    {t(labelKey, defaultLabel)}
                   </span>
                 ))}
               </div>
@@ -947,7 +1069,7 @@ export function LandingPage() {
                   <TrendingUp size={18} className="text-teal-400" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Google rating</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t("landing.hero.googleRating", "Google rating")}</p>
                   <p className="text-sm font-extrabold text-slate-900">3.8 → 4.8★</p>
                 </div>
               </div>
@@ -957,7 +1079,7 @@ export function LandingPage() {
                   <Bot size={18} className="text-cyan-400" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">AI triage</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{t("landing.hero.aiTriage", "AI triage")}</p>
                   <p className="text-sm font-extrabold text-slate-900">Hinglish · 24/7</p>
                 </div>
               </div>
@@ -970,7 +1092,7 @@ export function LandingPage() {
       <section className="border-y border-slate-200/80 bg-white/50 py-10 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <p className="mb-5 text-center text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-            Trusted by 2,400+ clinics across India
+            {t("landing.trust.text", "Trusted by 2,400+ clinics across India")}
           </p>
           <div className="marquee-wrap">
             <div className="marquee-track items-center gap-14 pr-14">
@@ -991,13 +1113,13 @@ export function LandingPage() {
       <section ref={statsRef} className="px-4 py-20 sm:px-6">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5">
           {[
-            { display: `${clinics.toLocaleString()}+`, label: "Automated clinics", icon: Users, color: "text-teal-600", ring: "from-teal-500/50" },
-            { display: `${(replies / 10).toFixed(0)}M+`, label: "AI queries resolved", icon: Bot, color: "text-cyan-600", ring: "from-cyan-500/50" },
-            { display: `${sat}%`, label: "Patient satisfaction", icon: Star, color: "text-amber-600", ring: "from-amber-500/50" },
-            { display: `${hours}h/wk`, label: "Hours saved per doctor", icon: Clock, color: "text-violet-600", ring: "from-violet-500/50" },
+            { display: `${clinics.toLocaleString()}+`, labelKey: "landing.stats.clinics", defaultLabel: "Automated clinics", icon: Users, color: "text-teal-600", ring: "from-teal-500/50" },
+            { display: `${(replies / 10).toFixed(0)}M+`, labelKey: "landing.stats.queries", defaultLabel: "AI queries resolved", icon: Bot, color: "text-cyan-600", ring: "from-cyan-500/50" },
+            { display: `${sat}%`, labelKey: "landing.stats.sat", defaultLabel: "Patient satisfaction", icon: Star, color: "text-amber-600", ring: "from-amber-500/50" },
+            { display: `${hours}h/wk`, labelKey: "landing.stats.hours", defaultLabel: "Hours saved per doctor", icon: Clock, color: "text-violet-600", ring: "from-violet-500/50" },
           ].map((s) => (
             <div
-              key={s.label}
+              key={s.labelKey}
               className="card-spotlight landing-glass group relative flex flex-col items-center overflow-hidden rounded-2xl px-4 py-9 text-center"
             >
               <div
@@ -1010,7 +1132,7 @@ export function LandingPage() {
                 <s.icon size={20} className={s.color} />
               </div>
               <p className={cn("text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl", s.color)}>{s.display}</p>
-              <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{s.label}</p>
+              <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t(s.labelKey, s.defaultLabel)}</p>
             </div>
           ))}
         </div>
@@ -1020,19 +1142,19 @@ export function LandingPage() {
       <section id="pain-points" className="relative px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <div className="mb-16 text-center">
-            <SectionBadge>Friction vs freedom</SectionBadge>
+            <SectionBadge>{t("landing.pain.badge", "Friction vs freedom")}</SectionBadge>
             <h2 className="landing-section-title text-3xl font-extrabold sm:text-4xl md:text-[2.75rem]">
-              Why traditional clinic workflows struggle
+              {t("landing.pain.title", "Why traditional clinic workflows struggle")}
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-slate-600 sm:text-base">
-              Manual booking, slow review replies, and no content pipeline cap how fast your practice can grow.
+              {t("landing.pain.subtitle", "Manual booking, slow review replies, and no content pipeline cap how fast your practice can grow.")}
             </p>
           </div>
 
           <div className="relative grid gap-6 md:grid-cols-2 md:gap-8">
             <div className="absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 md:flex">
               <span className="landing-glass rounded-full border border-slate-200 px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-slate-600 shadow-md">
-                vs
+                {t("landing.pain.vs", "vs")}
               </span>
             </div>
 
@@ -1040,23 +1162,23 @@ export function LandingPage() {
               <div className="mb-5 inline-flex rounded-2xl border border-rose-500/20 bg-rose-500/10 p-3 text-rose-400">
                 <X size={22} />
               </div>
-              <h3 className="text-xl font-bold">Traditional operations</h3>
+              <h3 className="text-xl font-bold">{t("landing.pain.traditionalTitle", "Traditional operations")}</h3>
               <p className="mt-2 mb-6 border-b border-rose-200 pb-4 text-sm text-slate-600">
-                Scheduling friction and missed reviews add up every week.
+                {t("landing.pain.traditionalSub", "Scheduling friction and missed reviews add up every week.")}
               </p>
               
               <ul className="space-y-4">
                 {[
-                  { title: "Missed Opportunities", text: "Staff misses 35% of patient calls and queries during evening hours." },
-                  { title: "Review Decline", text: "Happy patients leave without rating, while negative reviews dominate Google Maps SEO." },
-                  { title: "No-Show Costs", text: "15% of bookings are forgotten. No follow-up reminders means vacant hours." },
-                  { title: "Zero Video SEO", text: "Doctors have no time to record scripts, edit clinical health videos, or post Reels." },
+                  { titleKey: "landing.pain.traditionalItem1Title", defaultTitle: "Missed Opportunities", textKey: "landing.pain.traditionalItem1Text", defaultText: "Staff misses 35% of patient calls and queries during evening hours." },
+                  { titleKey: "landing.pain.traditionalItem2Title", defaultTitle: "Review Decline", textKey: "landing.pain.traditionalItem2Text", defaultText: "Happy patients leave without rating, while negative reviews dominate Google Maps SEO." },
+                  { titleKey: "landing.pain.traditionalItem3Title", defaultTitle: "No-Show Costs", textKey: "landing.pain.traditionalItem3Text", defaultText: "15% of bookings are forgotten. No follow-up reminders means vacant hours." },
+                  { titleKey: "landing.pain.traditionalItem4Title", defaultTitle: "Zero Video SEO", textKey: "landing.pain.traditionalItem4Text", defaultText: "Doctors have no time to record scripts, edit clinical health videos, or post Reels." },
                 ].map((item) => (
-                  <li key={item.title} className="flex gap-3 text-left">
+                  <li key={item.titleKey} className="flex gap-3 text-left">
                     <span className="h-1.5 w-1.5 rounded-full bg-rose-500 mt-2 shrink-0" />
                     <div>
-                      <h4 className="text-xs font-bold text-rose-700">{item.title}</h4>
-                      <p className="mt-0.5 text-xs text-slate-600">{item.text}</p>
+                      <h4 className="text-xs font-bold text-rose-700">{t(item.titleKey, item.defaultTitle)}</h4>
+                      <p className="mt-0.5 text-xs text-slate-600">{t(item.textKey, item.defaultText)}</p>
                     </div>
                   </li>
                 ))}
@@ -1067,23 +1189,23 @@ export function LandingPage() {
               <div className="mb-5 inline-flex rounded-2xl border border-teal-500/25 bg-teal-500/15 p-3 text-teal-400">
                 <CheckCircle2 size={22} />
               </div>
-              <h3 className="text-xl font-bold">ClinicSuite autopilot</h3>
+              <h3 className="text-xl font-bold">{t("landing.pain.autopilotTitle", "ClinicSuite autopilot")}</h3>
               <p className="mt-2 mb-6 border-b border-teal-200 pb-4 text-sm text-slate-600">
-                Fully automated patient comms, reviews, and content — on one dashboard.
+                {t("landing.pain.autopilotSub", "Fully automated patient comms, reviews, and content — on one dashboard.")}
               </p>
 
               <ul className="space-y-4">
                 {[
-                  { title: "24/7 AI Triage Responses", text: "AI instant chat handles 80%+ of basic patient queries in Hindi/English." },
-                  { title: "Automated Feedback Loops", text: "Review links are sent automatically via WhatsApp after consults." },
-                  { title: "Zero-Waste Calendar Engine", text: "Automated confirmation links, follow-up notifications, and waitlists." },
-                  { title: "AI-Powered Video Studio", text: "Create educational reels, subtitles, and voices in under 2 minutes." },
+                  { titleKey: "landing.pain.autopilotItem1Title", defaultTitle: "24/7 AI Triage Responses", textKey: "landing.pain.autopilotItem1Text", defaultText: "AI instant chat handles 80%+ of basic patient queries in Hindi/English." },
+                  { titleKey: "landing.pain.autopilotItem2Title", defaultTitle: "Automated Feedback Loops", textKey: "landing.pain.autopilotItem2Text", defaultText: "Review links are sent automatically via WhatsApp after consults." },
+                  { titleKey: "landing.pain.autopilotItem3Title", defaultTitle: "Zero-Waste Calendar Engine", textKey: "landing.pain.autopilotItem3Text", defaultText: "Automated confirmation links, follow-up notifications, and waitlists." },
+                  { titleKey: "landing.pain.autopilotItem4Title", defaultTitle: "AI-Powered Video Studio", textKey: "landing.pain.autopilotItem4Text", defaultText: "Create educational reels, subtitles, and voices in under 2 minutes." },
                 ].map((item) => (
-                  <li key={item.title} className="flex gap-3 text-left">
+                  <li key={item.titleKey} className="flex gap-3 text-left">
                     <span className="h-1.5 w-1.5 rounded-full bg-teal-400 mt-2 shrink-0 animate-ping" />
                     <div>
-                      <h4 className="text-xs font-bold text-teal-700">{item.title}</h4>
-                      <p className="mt-0.5 text-xs text-slate-600">{item.text}</p>
+                      <h4 className="text-xs font-bold text-teal-700">{t(item.titleKey, item.defaultTitle)}</h4>
+                      <p className="mt-0.5 text-xs text-slate-600">{t(item.textKey, item.defaultText)}</p>
                     </div>
                   </li>
                 ))}
@@ -1097,12 +1219,12 @@ export function LandingPage() {
       <section id="showcase" className="px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="mb-16 text-center">
-            <SectionBadge>Feature showcase</SectionBadge>
+            <SectionBadge>{t("landing.showcase.badge", "Feature showcase")}</SectionBadge>
             <h2 className="landing-section-title text-3xl font-extrabold sm:text-4xl">
-              One platform. Full automation.
+              {t("landing.showcase.title", "One platform. Full automation.")}
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-sm text-slate-600 sm:text-base">
-              Explore each module — real workflows your front desk and marketing team run daily.
+              {t("landing.showcase.subtitle", "Explore each module — real workflows your front desk and marketing team run daily.")}
             </p>
           </div>
 
@@ -1179,25 +1301,25 @@ export function LandingPage() {
       <section className="px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <div className="mb-16 text-center">
-            <SectionBadge>ROI calculator</SectionBadge>
+            <SectionBadge>{t("landing.roi.badge", "ROI calculator")}</SectionBadge>
             <h2 className="landing-section-title text-3xl font-extrabold sm:text-4xl">
-              Calculate your practice benefits
+              {t("landing.roi.title", "Calculate your practice benefits")}
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-slate-600">
-              Select your organization structure to estimate the resources and rating growth ClinicSuite delivers.
+              {t("landing.roi.subtitle", "Select your organization structure to estimate the resources and rating growth ClinicSuite delivers.")}
             </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-12 items-center">
             {/* Setup selection */}
             <div className="md:col-span-5 text-left space-y-4">
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Clinic Size / Network</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{t("landing.roi.labelSize", "Clinic Size / Network")}</p>
               
               <div className="space-y-2">
                 {[
-                  { id: "single", label: "Single Clinic / Specialist", sub: "1-2 doctors, solo practice" },
-                  { id: "multi", label: "Multi-Specialty / Center", sub: "3-10 doctors, group practice" },
-                  { id: "chain", label: "Hospital Network / Group", sub: "10+ branches, regional clinic chain" },
+                  { id: "single", labelKey: "landing.roi.optSingleLabel", defaultLabel: "Single Clinic / Specialist", subKey: "landing.roi.optSingleSub", defaultSub: "1-2 doctors, solo practice" },
+                  { id: "multi", labelKey: "landing.roi.optMultiLabel", defaultLabel: "Multi-Specialty / Center", subKey: "landing.roi.optMultiSub", defaultSub: "3-10 doctors, group practice" },
+                  { id: "chain", labelKey: "landing.roi.optChainLabel", defaultLabel: "Hospital Network / Group", subKey: "landing.roi.optChainSub", defaultSub: "10+ branches, regional clinic chain" },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -1209,8 +1331,8 @@ export function LandingPage() {
                         : "border-slate-200 text-slate-600 hover:border-teal-200 hover:bg-teal-50/40"
                     )}
                   >
-                    <p className="text-xs font-bold leading-tight text-slate-900">{item.label}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 leading-none">{item.sub}</p>
+                    <p className="text-xs font-bold leading-tight text-slate-900">{t(item.labelKey, item.defaultLabel)}</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-none">{t(item.subKey, item.defaultSub)}</p>
                   </button>
                 ))}
               </div>
@@ -1222,20 +1344,20 @@ export function LandingPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { label: "Admin Time Saved", val: roiCalculations[clinicType].hours, color: "text-teal-600" },
-                  { label: "Additional Bookings", val: roiCalculations[clinicType].consults, color: "text-cyan-600" },
-                  { label: "Reviews Sync Boost", val: roiCalculations[clinicType].reviews, color: "text-amber-600" },
-                  { label: "Est. Savings / Year", val: roiCalculations[clinicType].savings, color: "text-violet-600" },
+                  { labelKey: "landing.roi.resTimeLabel", defaultLabel: "Admin Time Saved", val: roiCalculations[clinicType].hours, color: "text-teal-600" },
+                  { labelKey: "landing.roi.resBookLabel", defaultLabel: "Additional Bookings", val: roiCalculations[clinicType].consults, color: "text-cyan-600" },
+                  { labelKey: "landing.roi.resReviewLabel", defaultLabel: "Reviews Sync Boost", val: roiCalculations[clinicType].reviews, color: "text-amber-600" },
+                  { labelKey: "landing.roi.resSavingsLabel", defaultLabel: "Est. Savings / Year", val: roiCalculations[clinicType].savings, color: "text-violet-600" },
                 ].map((res) => (
-                  <div key={res.label} className="rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm">
-                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">{res.label}</p>
+                  <div key={res.labelKey} className="rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">{t(res.labelKey, res.defaultLabel)}</p>
                     <p className={cn("mt-1 text-base font-black leading-tight sm:text-lg", res.color)}>{res.val}</p>
                   </div>
                 ))}
               </div>
 
               <p className="text-[10px] text-slate-500 mt-4 leading-normal">
-                *Estimates based on anonymized metadata from 2,400+ clinical integrations.
+                {t("landing.roi.disclaimer", "*Estimates based on anonymized metadata from 2,400+ clinical integrations.")}
               </p>
             </div>
           </div>
@@ -1246,12 +1368,12 @@ export function LandingPage() {
       <section id="features" className="px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="mb-16 text-center">
-            <SectionBadge>Platform features</SectionBadge>
+            <SectionBadge>{t("landing.features.badge", "Platform features")}</SectionBadge>
             <h2 className="landing-section-title text-3xl font-extrabold sm:text-4xl">
-              One central command center
+              {t("landing.features.title", "One central command center")}
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-slate-600">
-              Same modular layout experience as Video Studio and Review Inbox — unified for your entire practice staff.
+              {t("landing.features.subtitle", "Same modular layout experience as Video Studio and Review Inbox — unified for your entire practice staff.")}
             </p>
           </div>
 
@@ -1260,7 +1382,7 @@ export function LandingPage() {
               const accent = featureAccent[f.accent] ?? featureAccent.teal;
               return (
                 <motion.article
-                  key={f.title}
+                  key={f.titleKey}
                   className={cn(
                     "card-spotlight landing-glass group relative overflow-hidden rounded-2xl p-6 text-left transition duration-300",
                     accent.hoverBorder,
@@ -1282,8 +1404,8 @@ export function LandingPage() {
                   >
                     <f.icon size={20} />
                   </div>
-                  <h3 className="text-base font-bold transition group-hover:text-teal-700">{f.title}</h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-slate-600">{f.desc}</p>
+                  <h3 className="text-base font-bold transition group-hover:text-teal-700">{t(f.titleKey, f.defaultTitle)}</h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-slate-600">{t(f.descKey, f.defaultDesc)}</p>
                 </motion.article>
               );
             })}
@@ -1296,28 +1418,28 @@ export function LandingPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(14,165,233,0.06),transparent_50%)]" />
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
-            <SectionBadge>Enterprise security</SectionBadge>
+            <SectionBadge>{t("landing.security.badge", "Enterprise security")}</SectionBadge>
             <h2 className="landing-section-title text-2xl font-extrabold sm:text-3xl">
-              Clinic & patient data security
+              {t("landing.security.title", "Clinic & patient data security")}
             </h2>
             <p className="mx-auto mt-2 max-w-md text-xs text-slate-600">
-              Built on industry-standard encryption protocols aligned with healthcare security requirements.
+              {t("landing.security.subtitle", "Built on industry-standard encryption protocols aligned with healthcare security requirements.")}
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: Shield, title: "HIPAA Aligned", desc: "Data stored, encrypted and managed following patient security regulations." },
-              { icon: Lock, title: "256-bit Encryption", desc: "State-of-the-art encryption protocols for data in transit and at rest." },
-              { icon: Database, title: "India Residency", desc: "Patient data securely hosted inside local AWS Mumbai availability zones." },
-              { icon: CheckCircle2, title: "Role-Based Access", desc: "Custom access credentials ensuring patients records are hidden from non-clinical staff." },
+              { icon: Shield, titleKey: "landing.security.card1.title", defaultTitle: "HIPAA Aligned", descKey: "landing.security.card1.desc", defaultDesc: "Data stored, encrypted and managed following patient security regulations." },
+              { icon: Lock, titleKey: "landing.security.card2.title", defaultTitle: "256-bit Encryption", descKey: "landing.security.card2.desc", defaultDesc: "State-of-the-art encryption protocols for data in transit and at rest." },
+              { icon: Database, titleKey: "landing.security.card3.title", defaultTitle: "India Residency", descKey: "landing.security.card3.desc", defaultDesc: "Patient data securely hosted inside local AWS Mumbai availability zones." },
+              { icon: CheckCircle2, titleKey: "landing.security.card4.title", defaultTitle: "Role-Based Access", descKey: "landing.security.card4.desc", defaultDesc: "Custom access credentials ensuring patients records are hidden from non-clinical staff." },
             ].map((s) => (
-              <div key={s.title} className="landing-glass card-spotlight space-y-2.5 rounded-2xl p-5 text-left">
+              <div key={s.titleKey} className="landing-glass card-spotlight space-y-2.5 rounded-2xl p-5 text-left">
                 <div className="inline-flex rounded-lg bg-teal-50 p-2 text-teal-600">
                   <s.icon size={16} />
                 </div>
-                <h3 className="text-xs font-bold">{s.title}</h3>
-                <p className="text-[11px] leading-relaxed text-slate-600">{s.desc}</p>
+                <h3 className="text-xs font-bold">{t(s.titleKey, s.defaultTitle)}</h3>
+                <p className="text-[11px] leading-relaxed text-slate-600">{t(s.descKey, s.defaultDesc)}</p>
               </div>
             ))}
           </div>
@@ -1331,9 +1453,9 @@ export function LandingPage() {
             <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-teal-500/10 blur-3xl" />
             
             <div className="mb-12 text-center">
-              <SectionBadge>Simple Setup</SectionBadge>
-              <h2 className="text-3xl font-black">Live in three simple steps</h2>
-              <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">No software engineer required. Setup is fully automated.</p>
+              <SectionBadge>{t("landing.steps.badge", "Simple Setup")}</SectionBadge>
+              <h2 className="text-3xl font-black">{t("landing.steps.title", "Live in three simple steps")}</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">{t("landing.steps.subtitle", "No software engineer required. Setup is fully automated.")}</p>
             </div>
             
             <div className="grid gap-6 md:grid-cols-3 text-left">
@@ -1346,8 +1468,8 @@ export function LandingPage() {
                     <span className="text-3xl font-black text-teal-200">{s.num}</span>
                     <s.icon size={16} className="text-teal-600" />
                   </div>
-                  <h3 className="text-sm font-extrabold">{s.title}</h3>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-600">{s.desc}</p>
+                  <h3 className="text-sm font-extrabold">{t(s.titleKey, s.defaultTitle)}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-600">{t(s.descKey, s.defaultDesc)}</p>
                 </div>
               ))}
             </div>
@@ -1357,7 +1479,7 @@ export function LandingPage() {
                 href="/auth"
                 className="landing-btn-primary btn-shine inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-teal-500/25 transition hover:bg-teal-500"
               >
-                Get Started Free <ArrowRight size={16} />
+                {t("landing.steps.cta", "Get Started Free")} <ArrowRight size={16} />
               </a>
             </div>
           </div>
@@ -1368,17 +1490,17 @@ export function LandingPage() {
       <section id="pricing" className="px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="mb-16 text-center">
-            <SectionBadge>Simple pricing</SectionBadge>
+            <SectionBadge>{t("landing.pricing.badge", "Simple pricing")}</SectionBadge>
             <h2 className="landing-section-title text-3xl font-extrabold sm:text-4xl">
-              Transparent subscription plans
+              {t("landing.pricing.title", "Transparent subscription plans")}
             </h2>
-            <p className="mt-2 text-sm text-slate-600">Try any plan free for 14 days. Cancel anytime, no card required.</p>
+            <p className="mt-2 text-sm text-slate-600">{t("landing.pricing.subtitle", "Try any plan free for 14 days. Cancel anytime, no card required.")}</p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3 items-stretch">
             {plans.map((plan) => (
               <article
-                key={plan.name}
+                key={plan.nameKey}
                 className={cn(
                   "card-spotlight relative flex flex-col rounded-3xl border p-7 text-left transition duration-300 hover:-translate-y-1",
                   plan.featured
@@ -1388,25 +1510,25 @@ export function LandingPage() {
               >
                 {plan.featured && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-0.5 text-[9px] font-black text-slate-950 uppercase tracking-widest shadow-md">
-                    Most popular
+                    {t("landing.pricing.popular", "Most popular")}
                   </span>
                 )}
                 <p className={cn("text-xs font-black uppercase tracking-wider", plan.featured ? "text-teal-400" : "text-teal-500")}>
-                  {plan.name}
+                  {t(plan.nameKey, plan.defaultName)}
                 </p>
                 <p className="mt-3 text-4xl font-black">
-                  {plan.price}
-                  {plan.price !== "Custom Pricing" && (
-                    <span className="text-xs font-bold text-slate-500">/mo</span>
+                  {t(plan.priceKey, plan.defaultPrice)}
+                  {plan.defaultPrice !== "Custom Pricing" && (
+                    <span className="text-xs font-bold text-slate-500">{t("landing.pricing.perMonth", "/mo")}</span>
                   )}
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-slate-600">{plan.desc}</p>
+                <p className="mt-2 text-xs leading-relaxed text-slate-600">{t(plan.descKey, plan.defaultDesc)}</p>
                 
                 <ul className="my-8 flex-1 space-y-3">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-xs">
+                  {plan.featureKeys.map((fKey, fIdx) => (
+                    <li key={fKey} className="flex items-start gap-2 text-xs">
                       <CheckCircle2 size={13} className={cn("mt-0.5 shrink-0", plan.featured ? "text-teal-600" : "text-teal-500")} />
-                      <span className="leading-normal text-slate-700">{f}</span>
+                      <span className="leading-normal text-slate-700">{t(fKey, plan.defaultFeatures[fIdx])}</span>
                     </li>
                   ))}
                 </ul>
@@ -1420,7 +1542,7 @@ export function LandingPage() {
                       : "border border-slate-200 bg-white text-slate-900 hover:border-teal-200 hover:bg-teal-50"
                   )}
                 >
-                  {plan.cta}
+                  {t(plan.ctaKey, plan.defaultCta)}
                 </a>
               </article>
             ))}
@@ -1432,16 +1554,16 @@ export function LandingPage() {
       <section className="px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="mb-14 text-center">
-            <SectionBadge>Testimonials</SectionBadge>
+            <SectionBadge>{t("landing.testimonials.badge", "Testimonials")}</SectionBadge>
             <h2 className="landing-section-title text-3xl font-extrabold sm:text-4xl">
-              Real clinics. Real results.
+              {t("landing.testimonials.title", "Real clinics. Real results.")}
             </h2>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-3">
-            {testimonials.map((t) => (
+            {testimonials.map((test) => (
               <article
-                key={t.name}
+                key={test.nameKey}
                 className="card-spotlight landing-glass flex flex-col rounded-2xl p-6 text-left transition hover:border-teal-500/20"
               >
                 <div className="mb-4 flex gap-0.5 text-amber-400">
@@ -1450,15 +1572,15 @@ export function LandingPage() {
                   ))}
                 </div>
                 <Quote size={22} className="mb-3 text-teal-500/25" />
-                <p className="mb-6 flex-1 text-sm leading-relaxed text-slate-600">&ldquo;{t.quote}&rdquo;</p>
+                <p className="mb-6 flex-1 text-sm leading-relaxed text-slate-600">&ldquo;{t(test.quoteKey, test.defaultQuote)}&rdquo;</p>
 
                 <div className="flex items-center gap-3 border-t border-slate-200 pt-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 text-xs font-black text-white shadow-md shadow-teal-500/20">
-                    {t.initials}
+                    {test.initials}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900">{t.name}</p>
-                    <p className="text-xs text-slate-500">{t.role}</p>
+                    <p className="text-sm font-bold text-slate-900">{t(test.nameKey, test.defaultName)}</p>
+                    <p className="text-xs text-slate-500">{t(test.roleKey, test.defaultRole)}</p>
                   </div>
                 </div>
               </article>
@@ -1471,8 +1593,8 @@ export function LandingPage() {
       <section id="faq" className="px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-3xl">
           <div className="mb-12 text-center">
-            <SectionBadge>FAQ</SectionBadge>
-            <h2 className="text-3xl font-black">Common Questions</h2>
+            <SectionBadge>{t("landing.faq.badge", "FAQ")}</SectionBadge>
+            <h2 className="text-3xl font-black">{t("landing.faq.title", "Common Questions")}</h2>
           </div>
 
           <div className="space-y-3">
@@ -1480,7 +1602,7 @@ export function LandingPage() {
               const isOpen = openFaq === idx;
               return (
                 <div
-                  key={item.q}
+                  key={item.qKey}
                   className={cn(
                     "overflow-hidden rounded-2xl border transition duration-300",
                     isOpen ? "landing-glass-strong border-teal-400/40" : "landing-glass border-slate-200/90"
@@ -1491,7 +1613,7 @@ export function LandingPage() {
                     className="flex w-full items-center justify-between gap-4 px-5 py-4.5 text-left text-sm font-bold text-slate-900"
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
                   >
-                    <span>{item.q}</span>
+                    <span>{t(item.qKey, item.defaultQ)}</span>
                     <ChevronDown
                       size={16}
                       className={cn("shrink-0 text-teal-600 transition-transform duration-300", isOpen && "rotate-180")}
@@ -1500,7 +1622,7 @@ export function LandingPage() {
                   <div className={cn("faq-body", isOpen && "open")}>
                     <div>
                       <p className="border-t border-slate-200 px-5 pb-5 pt-3 text-xs leading-relaxed text-slate-600">
-                        {item.a}
+                        {t(item.aKey, item.defaultA)}
                       </p>
                     </div>
                   </div>
@@ -1510,9 +1632,9 @@ export function LandingPage() {
           </div>
 
           <div className="landing-glass-strong mt-10 rounded-2xl border border-teal-200/60 px-6 py-8 text-center sm:px-10">
-            <h3 className="text-lg font-bold text-slate-900">Contact us</h3>
+            <h3 className="text-lg font-bold text-slate-900">{t("landing.faq.contact", "Contact us")}</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Have questions? Reach out anytime — we&apos;re happy to help.
+              {t("landing.faq.contactSub", "Have questions? Reach out anytime — we're happy to help.")}
             </p>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
@@ -1531,25 +1653,25 @@ export function LandingPage() {
           <div className="landing-glass-strong relative overflow-hidden rounded-[2rem] px-8 py-16 text-center sm:px-14 sm:py-20">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(20,184,166,0.12),transparent_55%)]" />
             <div className="landing-divider absolute inset-x-8 top-0 sm:inset-x-14" />
-            <SectionBadge className="relative mb-6">Get started today</SectionBadge>
+            <SectionBadge className="relative mb-6">{t("landing.cta.badge", "Get started today")}</SectionBadge>
             <h2 className="landing-section-title relative text-3xl font-extrabold sm:text-4xl md:text-5xl">
-              Ready to automate your clinic?
+              {t("landing.cta.title", "Ready to automate your clinic?")}
             </h2>
             <p className="relative mx-auto mt-5 max-w-lg text-sm leading-relaxed text-slate-600 sm:text-base">
-              Join thousands of practices saving admin hours every week. Go live in under five minutes — no developer required.
+              {t("landing.cta.subtitle", "Join thousands of practices saving admin hours every week. Go live in under five minutes — no developer required.")}
             </p>
             <div className="relative mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <a
                 href="/auth"
                 className="landing-btn-primary btn-shine inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 px-9 py-4 text-sm font-bold text-white shadow-xl shadow-teal-600/20 transition hover:brightness-110"
               >
-                Start free trial <ArrowRight size={16} />
+                {t("landing.cta.ctaStart", "Start free trial")} <ArrowRight size={16} />
               </a>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
                 className="landing-glass inline-flex items-center gap-2 rounded-2xl px-9 py-4 text-sm font-semibold text-slate-700 transition hover:border-teal-300"
               >
-                Contact us <ArrowUpRight size={16} className="text-teal-600" />
+                {t("landing.cta.ctaContact", "Contact us")} <ArrowUpRight size={16} className="text-teal-600" />
               </a>
             </div>
           </div>
@@ -1562,23 +1684,27 @@ export function LandingPage() {
           <div className="sm:col-span-2 space-y-3.5">
             <BrandLogo variant="full" href="/" size="xl" />
             <p className="max-w-xs text-xs leading-relaxed text-slate-500">
-              AI-powered practice growth, patient communication, ratings autopilot, and reels marketing studio for modern Indian clinics.
+              {t("landing.footer.desc", "AI-powered practice growth, patient communication, ratings autopilot, and reels marketing studio for modern Indian clinics.")}
             </p>
           </div>
           <div>
-            <h4 className="text-xs font-black uppercase tracking-widest text-slate-900">Product</h4>
+            <h4 className="text-xs font-black uppercase tracking-widest text-slate-900">{t("landing.footer.product", "Product")}</h4>
             <ul className="mt-4 space-y-2.5 text-xs text-slate-500">
-              {["Features", "Pricing", "Case Studies"].map((l) => (
-                <li key={l}>
+              {[
+                { labelKey: "landing.nav.features", defaultLabel: "Features" },
+                { labelKey: "landing.nav.pricing", defaultLabel: "Pricing" },
+                { labelKey: "landing.footer.caseStudies", defaultLabel: "Case Studies" }
+              ].map((link) => (
+                <li key={link.labelKey}>
                   <a href="#" className="hover:text-teal-400 transition">
-                    {l}
+                    {t(link.labelKey, link.defaultLabel)}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <h4 className="text-xs font-black uppercase tracking-widest text-slate-900">Contact</h4>
+            <h4 className="text-xs font-black uppercase tracking-widest text-slate-900">{t("landing.footer.contact", "Contact")}</h4>
             <ul className="mt-4 space-y-2.5 text-xs text-slate-500">
               <li>
                 <a
@@ -1591,19 +1717,19 @@ export function LandingPage() {
               </li>
               <li className="flex items-center gap-2">
                 <MapPin size={13} className="text-teal-600" />
-                Mumbai, India
+                {t("landing.footer.mumbai", "Mumbai, India")}
               </li>
             </ul>
           </div>
         </div>
         <div className="mx-auto mt-10 flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6 text-[11px] text-slate-600">
-          <p>© 2026 ClinicSuite. All rights reserved.</p>
+          <p>{t("landing.footer.copyright", "© 2026 ClinicSuite. All rights reserved.")}</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-teal-400 transition">
-              Privacy Policy
+              {t("landing.footer.privacy", "Privacy Policy")}
             </a>
             <a href="#" className="hover:text-teal-400 transition">
-              Terms of Service
+              {t("landing.footer.terms", "Terms of Service")}
             </a>
           </div>
         </div>

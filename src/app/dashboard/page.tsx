@@ -14,6 +14,7 @@ import { ProfileSettings } from "@/components/profile/ProfileSettings";
 import { PrescriptionDashboard } from "@/components/prescriptions/PrescriptionDashboard";
 import { clearAuthSession } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useLanguage, type Language } from "@/lib/LanguageContext";
 import { Bell, Command, Menu, Search, X } from "lucide-react";
 
 interface UserProfile {
@@ -23,57 +24,57 @@ interface UserProfile {
 
 const sectionMeta: Record<
   string,
-  { title: string; sub: string; breadcrumb: string }
+  { titleKey: string; subKey: string; breadcrumbKey: string }
 > = {
   dash: {
-    title: "Dashboard",
-    sub: "Your clinic performance at a glance",
-    breadcrumb: "Overview",
+    titleKey: "section.dash.title",
+    subKey: "section.dash.sub",
+    breadcrumbKey: "sidebar.overview",
   },
   profile: {
-    title: "Profile",
-    sub: "Clinic details, knowledge base & branding",
-    breadcrumb: "Profile",
+    titleKey: "section.profile.title",
+    subKey: "section.profile.sub",
+    breadcrumbKey: "sidebar.profile",
   },
   chat: {
-    title: "AI Health Chat",
-    sub: "Intelligent patient conversations",
-    breadcrumb: "Health Chat",
+    titleKey: "section.chat.title",
+    subKey: "section.chat.sub",
+    breadcrumbKey: "chat.title",
   },
   content: {
-    title: "Content Engine",
-    sub: "One topic → reels, blog, captions, hashtags & more",
-    breadcrumb: "Content Engine",
+    titleKey: "section.content.title",
+    subKey: "section.content.sub",
+    breadcrumbKey: "sidebar.contentengine",
   },
   video: {
-    title: "Video Studio",
-    sub: "Generate, publish & schedule clinic videos",
-    breadcrumb: "Video Studio",
+    titleKey: "section.video.title",
+    subKey: "section.video.sub",
+    breadcrumbKey: "sidebar.videostudio",
   },
   "yt-analytics": {
-    title: "YouTube Analytics",
-    sub: "Views, watch time, subscribers & comment sentiment",
-    breadcrumb: "YouTube Analytics",
+    titleKey: "section.yt-analytics.title",
+    subKey: "section.yt-analytics.sub",
+    breadcrumbKey: "sidebar.analytics",
   },
   reviews: {
-    title: "Reviews",
-    sub: "",
-    breadcrumb: "Reviews",
+    titleKey: "section.reviews.title",
+    subKey: "section.reviews.sub",
+    breadcrumbKey: "sidebar.reviews",
   },
   booking: {
-    title: "Consultations",
-    sub: "",
-    breadcrumb: "Consultations",
+    titleKey: "section.booking.title",
+    subKey: "section.booking.sub",
+    breadcrumbKey: "sidebar.consultations",
   },
   prescriptions: {
-    title: "Prescriptions",
-    sub: "Manage and dispatch patient prescriptions",
-    breadcrumb: "Prescriptions",
+    titleKey: "section.prescriptions.title",
+    subKey: "section.prescriptions.sub",
+    breadcrumbKey: "sidebar.prescriptions",
   },
   integrations: {
-    title: "Integrations",
-    sub: "",
-    breadcrumb: "Integrations",
+    titleKey: "section.integrations.title",
+    subKey: "section.integrations.sub",
+    breadcrumbKey: "sidebar.integrations",
   },
 };
 
@@ -83,6 +84,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<UserProfile>({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [videoSeedTopic, setVideoSeedTopic] = useState<string | null>(null);
+
+  const { language, setLanguage, t } = useLanguage();
 
   useEffect(() => {
     const token = localStorage.getItem("access_token") || localStorage.getItem("token");
@@ -197,14 +200,14 @@ export default function DashboardPage() {
             <div className="min-w-0">
               {!isDash && (
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                  Workspace / {current.breadcrumb}
+                  {t("header.workspace", "Workspace")} / {t(current.breadcrumbKey)}
                 </p>
               )}
               <h2 className="truncate text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-                {current.title}
+                {t(current.titleKey)}
               </h2>
-              {!isChat && current.sub ? (
-                <p className="hidden truncate text-sm text-slate-500 sm:block">{current.sub}</p>
+              {!isChat && current.subKey ? (
+                <p className="hidden truncate text-sm text-slate-500 sm:block">{t(current.subKey)}</p>
               ) : null}
             </div>
           </div>
@@ -213,13 +216,27 @@ export default function DashboardPage() {
             <div className="hidden items-center gap-2 rounded-2xl border border-slate-200/70 bg-white/60 py-2 pl-3 pr-2 shadow-sm md:flex">
               <Search size={15} className="shrink-0 text-slate-400" />
               <input
-                placeholder="Search workspace…"
+                placeholder={t("header.search", "Search workspace...")}
                 className="w-36 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400 lg:w-44"
               />
               <kbd className="hidden items-center gap-0.5 rounded-lg border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-400 lg:inline-flex">
                 <Command size={10} />K
               </kbd>
             </div>
+            
+            {/* Language Selector Dropdown */}
+            <div className="relative">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                className="cursor-pointer rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-bold text-slate-700 outline-none hover:border-teal-300 hover:text-teal-600 shadow-sm"
+              >
+                <option value="en">🇬🇧 EN</option>
+                <option value="hi">🇮🇳 HI</option>
+                <option value="de">🇩🇪 DE</option>
+              </select>
+            </div>
+
             <button
               type="button"
               className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/70 bg-white text-slate-500 shadow-sm transition hover:border-teal-300/50 hover:text-teal-600"

@@ -36,23 +36,25 @@ import {
   type YoutubeVideoInsights,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const suggestions = [
-  "Benefits of drinking water in the morning",
-  "Yoga for back pain relief",
-  "Diabetes management tips",
-  "Heart health and diet",
-  "Benefits of morning walk",
+  { key: "video.suggestion.water", defaultVal: "Benefits of drinking water in the morning" },
+  { key: "video.suggestion.yoga", defaultVal: "Yoga for back pain relief" },
+  { key: "video.suggestion.diabetes", defaultVal: "Diabetes management tips" },
+  { key: "video.suggestion.heart", defaultVal: "Heart health and diet" },
+  { key: "video.suggestion.walk", defaultVal: "Benefits of morning walk" },
 ];
 
 const panelClass = "backdrop-blur-xl bg-white/70 border border-white/50 shadow-xl rounded-3xl transition-all duration-300";
 
 type LibraryFilter = "all" | "draft" | "published" | "scheduled";
 
-function formatDate(iso?: string | null) {
+function formatDate(iso?: string | null, lang?: string) {
   if (!iso) return "";
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
+    const locale = lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US";
+    return new Date(iso).toLocaleDateString(locale, {
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -75,6 +77,7 @@ interface VideoGeneratorProps {
 }
 
 export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGeneratorProps) => {
+  const { t, language } = useLanguage();
   const [topic, setTopic] = useState("");
   const [library, setLibrary] = useState<GeneratedVideoEntry[]>([]);
   const [libraryFilter, setLibraryFilter] = useState<LibraryFilter>("all");
@@ -163,11 +166,11 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
         return videos[0]?.id ?? null;
       });
     } catch {
-      setError("Could not load video library.");
+      setError(t("video.loadError", "Could not load video library."));
     } finally {
       setLibraryLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const loadInsights = useCallback(async (videoId: string, silent = false) => {
     setInsightsLoading(true);
@@ -177,12 +180,12 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
       setInsights(data);
     } catch (err: unknown) {
       if (!silent) {
-        setError(err instanceof Error ? err.message : "Could not load YouTube insights.");
+        setError(err instanceof Error ? err.message : t("video.insightsError", "Could not load YouTube insights."));
       }
     } finally {
       setInsightsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const loadAnalytics = useCallback(async () => {
     setAnalyticsLoading(true);
@@ -191,11 +194,11 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
       const res = await videoApi.getAnalytics();
       setAnalyticsData(res);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not load analytics.");
+      setError(err instanceof Error ? err.message : t("video.analyticsError", "Could not load analytics."));
     } finally {
       setAnalyticsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadLibrary();
@@ -257,8 +260,8 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
     setSchedPlatform("youtube");
   }, [selected?.id, selected?.topic, isPublished, isScheduled]);
 
-  const handleGenerate = async (t?: string) => {
-    const finalTopic = (t ?? topic).trim();
+  const handleGenerate = async (tVal?: string) => {
+    const finalTopic = (tVal ?? topic).trim();
     if (!finalTopic) return;
     setTopic(finalTopic);
     setIsGenerating(true);
@@ -270,9 +273,9 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
       setLibrary((prev) => [entry, ...prev.filter((v) => v.id !== entry.id)]);
       setSelectedId(entry.id);
       setLibraryFilter("draft");
-      setMessage("Video saved to your library.");
+      setMessage(t("video.saveSuccess", "Video saved to your library."));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to generate video.");
+      setError(err instanceof Error ? err.message : t("video.generationFailed", "Failed to generate video."));
     } finally {
       setIsGenerating(false);
     }
@@ -302,9 +305,9 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
       };
       setLibrary((prev) => prev.map((v) => (v.id === merged.id ? merged : v)));
       setLibraryFilter("published");
-      setMessage("Published to YouTube successfully.");
+      setMessage(t("video.publishSuccess", "Published to YouTube successfully."));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "YouTube publish failed.");
+      setError(err instanceof Error ? err.message : t("video.publishError", "YouTube publish failed."));
     } finally {
       setPublishLoading(false);
     }
@@ -327,9 +330,9 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
       const updated = result.video as GeneratedVideoEntry;
       setLibrary((prev) => prev.map((v) => (v.id === updated.id ? updated : v)));
       setLibraryFilter("scheduled");
-      setMessage(`Video scheduled successfully for ${schedPlatform}.`);
+      setMessage(t("video.scheduleSuccess", `Video scheduled successfully for ${schedPlatform}.`));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Scheduling failed.");
+      setError(err instanceof Error ? err.message : t("video.scheduleError", "Scheduling failed."));
     } finally {
       setPublishLoading(false);
     }
@@ -339,14 +342,14 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
     const tags = insights?.recommendations?.suggested_hashtags?.join(" ") ?? "";
     if (!tags) return;
     void navigator.clipboard.writeText(tags);
-    setMessage("Hashtags copied to clipboard.");
+    setMessage(t("video.hashtagsCopied", "Hashtags copied to clipboard."));
   };
 
   const filterPills: { id: LibraryFilter; label: string; count: number }[] = [
-    { id: "all", label: "All Assets", count: counts.all },
-    { id: "draft", label: "Drafts", count: counts.draft },
-    { id: "scheduled", label: "Scheduled", count: counts.scheduled },
-    { id: "published", label: "Published", count: counts.published },
+    { id: "all", label: t("video.all", "All"), count: counts.all },
+    { id: "draft", label: t("video.drafts", "Drafts"), count: counts.draft },
+    { id: "scheduled", label: t("video.scheduled", "Scheduled"), count: counts.scheduled },
+    { id: "published", label: t("video.published", "Published"), count: counts.published },
   ];
 
   const renderSvgChart = (viewsTrend: any[]) => {
@@ -633,7 +636,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
           )}
         >
           <Film size={15} />
-          Video Studio
+          {t("video.title", "Video Studio")}
         </button>
         <button
           type="button"
@@ -649,7 +652,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
           )}
         >
           <BarChart3 size={15} />
-          Analytics Dashboard
+          {t("video.analyticsDashboard", "Analytics Dashboard")}
         </button>
       </div>
 
@@ -663,13 +666,13 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
               <div className="space-y-2.5 max-w-xl">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/35 text-[10px] font-extrabold text-violet-400 uppercase tracking-widest ring-1 ring-violet-400/20">
                   <Sparkles size={11} className="text-violet-300 animate-spin-slow" />
-                  AI Production Engine
+                  {t("video.productionEngine", "AI Production Engine")}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
-                  AI Video Creator
+                  {t("video.aiCreator", "AI Video Creator")}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-medium">
-                  Craft stunning patient education shorts and reels instantly. Just type a clinical topic and let our AI assemble the script, voice segments, slides, and subtitle tracks.
+                  {t("video.introDesc", "Craft stunning patient education shorts and reels instantly. Just type a clinical topic and let our AI assemble the script, voice segments, slides, and subtitle tracks.")}
                 </p>
               </div>
               <div className="shrink-0 flex self-start md:self-center">
@@ -686,9 +689,9 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
               <div>
                 <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                   <Layers className="text-violet-600" size={18} />
-                  What topic should we explain?
+                  {t("video.whatTopic", "What topic should we explain?")}
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5 font-medium">Describe your video script guidelines or choose a preset topic</p>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">{t("video.describeGuidelines", "Describe your video script guidelines or choose a preset topic")}</p>
               </div>
 
               <div className="flex flex-col gap-3 md:flex-row">
@@ -697,7 +700,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && void handleGenerate()}
-                  placeholder="e.g. Benefits of physical therapy for arthritis patients..."
+                  placeholder={t("video.placeholder", "e.g. Benefits of physical therapy for arthritis patients...")}
                   className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm outline-none transition-all focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 placeholder:text-slate-400 font-medium"
                 />
                 <button
@@ -709,29 +712,29 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                   {isGenerating ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      Creating...
+                      {t("video.creating", "Creating...")}
                     </>
                   ) : (
                     <>
                       <Sparkles size={16} />
-                      Generate Video
+                      {t("video.generateVideo", "Generate Video")}
                     </>
                   )}
                 </button>
               </div>
 
               <div className="space-y-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Suggested Presets</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("video.suggestedPresets", "Suggested Presets")}</p>
                 <div className="flex flex-wrap gap-2">
                   {suggestions.map((s) => (
                     <button
-                      key={s}
+                      key={s.key}
                       type="button"
-                      onClick={() => void handleGenerate(s)}
+                      onClick={() => void handleGenerate(t(s.key, s.defaultVal))}
                       disabled={isGenerating}
                       className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 hover:border-violet-300 hover:text-violet-700 disabled:opacity-40"
                     >
-                      {s}
+                      {t(s.key, s.defaultVal)}
                     </button>
                   ))}
                 </div>
@@ -747,19 +750,19 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                   <Loader2 className="animate-spin" size={20} />
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="font-extrabold text-slate-800 text-sm">AI Video Generation Active</h4>
-                  <p className="text-xs text-slate-500">Synthesizing audio and overlaying script subtitles. Please wait.</p>
+                  <h4 className="font-extrabold text-slate-800 text-sm">{t("video.generationActive", "AI Video Generation Active")}</h4>
+                  <p className="text-xs text-slate-500">{t("video.generationActiveSub", "Synthesizing audio and overlaying script subtitles. Please wait.")}</p>
                 </div>
               </div>
               
               {/* Progressive Steps Timeline */}
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 pt-3 border-t border-slate-100">
                 {[
-                  "Analyzing Topic",
-                  "Writing Script",
-                  "Synthesizing Voice",
-                  "Creating Slides",
-                  "Compiling Video"
+                  t("video.step1", "Analyzing Topic"),
+                  t("video.step2", "Writing Script"),
+                  t("video.step3", "Synthesizing Voice"),
+                  t("video.step4", "Creating Slides"),
+                  t("video.step5", "Compiling Video")
                 ].map((step, idx) => {
                   const done = idx < generationStep;
                   const active = idx === generationStep;
@@ -795,8 +798,8 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
             <aside className="space-y-4 lg:sticky lg:top-6 lg:col-span-4 lg:self-start">
               <div className="flex items-center justify-between px-1">
                 <div>
-                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">Library</h3>
-                  <p className="text-[11px] font-semibold text-slate-400 mt-0.5">{library.length} assets generated</p>
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">{t("video.library", "Library")}</h3>
+                  <p className="text-[11px] font-semibold text-slate-400 mt-0.5">{library.length} {t("video.assetsCount", "assets generated")}</p>
                 </div>
                 <button
                   type="button"
@@ -806,7 +809,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                   aria-label="Refresh library"
                 >
                   <RefreshCcw size={13} className={cn(libraryLoading && "animate-spin")} />
-                  Refresh
+                  {t("video.refresh", "Refresh")}
                 </button>
               </div>
 
@@ -824,7 +827,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                         : "text-slate-500 hover:text-slate-800"
                     )}
                   >
-                    {f.label.split(" ")[0]} ({f.count})
+                    {f.label} ({f.count})
                   </button>
                 ))}
               </div>
@@ -834,12 +837,12 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                 {libraryLoading ? (
                   <div className="flex flex-col items-center justify-center py-20 gap-2">
                     <Loader2 className="animate-spin text-violet-500" size={24} />
-                    <p className="text-xs text-slate-400">Loading library...</p>
+                    <p className="text-xs text-slate-400">{t("video.loadingLibrary", "Loading library...")}</p>
                   </div>
                 ) : filteredLibrary.length === 0 ? (
                   <div className="py-20 text-center space-y-2">
                     <Film size={28} className="mx-auto text-slate-300" />
-                    <p className="text-xs text-slate-400 font-medium">No video files found here.</p>
+                    <p className="text-xs text-slate-400 font-medium">{t("video.noVideos", "No video files found here.")}</p>
                   </div>
                 ) : (
                   filteredLibrary.map((v) => {
@@ -873,7 +876,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                         </div>
                         <div className="min-w-0 flex-1 space-y-1.5">
                           <p className="line-clamp-2 text-xs font-bold text-slate-800 leading-normal">{v.topic}</p>
-                          <p className="text-[10px] font-semibold text-slate-400">{formatDate(v.created_at)}</p>
+                          <p className="text-[10px] font-semibold text-slate-400">{formatDate(v.created_at, language)}</p>
                         </div>
                       </button>
                     );
@@ -887,15 +890,15 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
               {!selected ? (
                 <div className={cn(panelClass, "flex flex-col items-center py-24 text-center bg-white/40")}>
                   <Video size={48} className="text-slate-300" />
-                  <p className="mt-4 text-sm font-bold text-slate-500">Select an asset to view details</p>
-                  <p className="text-xs text-slate-400 mt-1">Select from library or generate a new script above</p>
+                  <p className="mt-4 text-sm font-bold text-slate-500">{t("video.selectAsset", "Select an asset to view details")}</p>
+                  <p className="text-xs text-slate-400 mt-1">{t("video.selectAssetSub", "Select from library or generate a new script above")}</p>
                 </div>
               ) : (
                 <div className="space-y-5">
                   {/* Visual Smartphone Preview Bezel */}
                   <div className={cn(panelClass, "overflow-hidden p-6 border border-slate-200/80 shadow-xl bg-slate-900/5 flex flex-col items-center gap-6")}>
                     <div className="w-full text-center">
-                      <p className="text-[10px] font-black tracking-wider text-slate-400 uppercase">Shorts / Reels Preview Mockup</p>
+                      <p className="text-[10px] font-black tracking-wider text-slate-400 uppercase">{t("video.previewMockup", "Shorts / Reels Preview Mockup")}</p>
                       <h4 className="text-xs text-slate-500 mt-0.5 truncate max-w-lg mx-auto font-medium">{selected.topic}</h4>
                     </div>
 
@@ -933,7 +936,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                       <div className="absolute bottom-2 left-2 right-12 z-10 pointer-events-none text-left p-2.5 bg-gradient-to-t from-black/70 to-transparent rounded-lg">
                         <div className="flex items-center gap-1.5">
                           <div className="h-5 w-5 rounded-full bg-violet-655 border border-white/20 text-[8px] font-extrabold text-white flex items-center justify-center">Dr</div>
-                          <span className="text-[9px] font-black text-white truncate shadow-sm">Your Clinic Channel</span>
+                          <span className="text-[9px] font-black text-white truncate shadow-sm">{t("video.clinicChannel", "Your Clinic Channel")}</span>
                         </div>
                         <p className="text-[8px] text-white/90 truncate mt-1 shadow-sm leading-tight font-medium">{selected.topic}</p>
                       </div>
@@ -946,22 +949,22 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                           {isScheduled ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-[10px] font-black text-violet-600 uppercase tracking-wider shadow-sm">
                               <Calendar size={11} />
-                              Scheduled
+                              {t("video.scheduled", "Scheduled")}
                             </span>
                           ) : isPublished ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-black text-emerald-600 uppercase tracking-wider shadow-sm">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-black text-emerald-605 uppercase tracking-wider shadow-sm">
                               <CheckCircle2 size={11} />
-                              Published
+                              {t("video.published", "Published")}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10px] font-black text-amber-600 uppercase tracking-wider shadow-sm">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10px] font-black text-amber-606 uppercase tracking-wider shadow-sm">
                               <Info size={11} />
-                              Draft
+                              {t("video.draft", "Draft")}
                             </span>
                           )}
                           {isPublished && selected.youtube_privacy && (
                             <span className="rounded-md bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
-                              {privacyLabel(selected.youtube_privacy)}
+                              {t("video.privacy." + selected.youtube_privacy, privacyLabel(selected.youtube_privacy))}
                             </span>
                           )}
                         </div>
@@ -972,7 +975,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                         className="inline-flex items-center justify-center gap-1.5 h-9 rounded-xl bg-white border border-slate-200/80 px-4 text-xs font-bold text-slate-700 transition hover:bg-slate-50 active:scale-95 shadow-sm"
                       >
                         <Download size={14} />
-                        Download mp4
+                        {t("video.downloadMp4", "Download mp4")}
                       </button>
                     </div>
                   </div>
@@ -985,12 +988,12 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                           <Calendar size={22} />
                         </div>
                         <div className="space-y-1.5">
-                          <h3 className="font-extrabold text-slate-900 text-sm">Scheduled publication queue</h3>
+                          <h3 className="font-extrabold text-slate-900 text-sm">{t("video.scheduledQueue", "Scheduled publication queue")}</h3>
                           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                            This video package is scheduled to auto-publish to <strong className="capitalize text-slate-900">{selected.publish_platform}</strong> on <strong>{formatDate(selected.scheduled_publish_time)}</strong>.
+                            {t("video.scheduledToPublish", "This video package is scheduled to auto-publish to")} <strong className="capitalize text-slate-900">{selected.publish_platform}</strong> {t("video.onDate", "on")} <strong>{formatDate(selected.scheduled_publish_time, language)}</strong>.
                           </p>
                           <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
-                            Polled by background worker thread
+                            {t("video.polledWorker", "Polled by background worker thread")}
                           </p>
                         </div>
                       </div>
@@ -1012,7 +1015,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                               : "border-transparent text-slate-400 hover:text-slate-700"
                           )}
                         >
-                          Publish instantly
+                          {t("video.publishInstantly", "Publish instantly")}
                         </button>
                         <button
                           type="button"
@@ -1024,7 +1027,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                               : "border-transparent text-slate-400 hover:text-slate-700"
                           )}
                         >
-                          Schedule for future
+                          {t("video.scheduleFuture", "Schedule for future")}
                         </button>
                       </div>
 
@@ -1037,33 +1040,33 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                           </div>
                           <div>
                             <h4 className="text-sm font-black text-slate-800 leading-none">
-                              {publishMode === "now" ? "Upload directly to YouTube" : "Schedule Auto-Publish"}
+                              {publishMode === "now" ? t("video.uploadDirectly", "Upload directly to YouTube") : t("video.scheduleAutoPublish", "Schedule Auto-Publish")}
                             </h4>
                             <p className="text-[11px] text-slate-400 mt-1 font-semibold uppercase tracking-wider">
-                              {publishMode === "now" ? "Immediate production upload" : "Social media scheduler task"}
+                              {publishMode === "now" ? t("video.immediateUpload", "Immediate production upload") : t("video.schedulerTask", "Social media scheduler task")}
                             </p>
                           </div>
                         </div>
 
                         {/* Title input */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Video Title</label>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("video.videoTitle", "Video Title")}</label>
                           <input
                             type="text"
                             value={ytTitle}
                             onChange={(e) => setYtTitle(e.target.value)}
-                            placeholder="Enter video title"
+                            placeholder={t("video.enterTitle", "Enter video title")}
                             className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none transition-all focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 placeholder:text-slate-400 font-medium"
                           />
                         </div>
 
                         {/* Description input */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</label>
+                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("video.description", "Description")}</label>
                           <textarea
                             value={ytDesc}
                             onChange={(e) => setYtDesc(e.target.value)}
-                            placeholder="Provide details or call to action..."
+                            placeholder={t("video.provideDetails", "Provide details or call to action...")}
                             rows={3}
                             className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none transition-all focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 placeholder:text-slate-400 font-medium"
                           />
@@ -1074,7 +1077,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             {/* Visual Platform Selectors */}
                             <div className="space-y-1.5 sm:col-span-2">
-                              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Platform</label>
+                              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("video.platform", "Platform")}</label>
                               <div className="grid grid-cols-2 gap-3">
                                 <button
                                   type="button"
@@ -1106,7 +1109,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                             </div>
 
                             <div className="space-y-1 sm:col-span-2">
-                              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date &amp; Time</label>
+                              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("video.dateTime", "Date & Time")}</label>
                               <input
                                 type="datetime-local"
                                 value={scheduledTime}
@@ -1124,9 +1127,9 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                               onChange={(e) => setPrivacy(e.target.value as any)}
                               className="rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none sm:w-40 focus:border-violet-500 font-bold text-slate-700"
                             >
-                              <option value="unlisted">Unlisted</option>
-                              <option value="public">Public</option>
-                              <option value="private">Private</option>
+                              <option value="unlisted">{t("video.unlisted", "Unlisted")}</option>
+                              <option value="public">{t("video.public", "Public")}</option>
+                              <option value="private">{t("video.private", "Private")}</option>
                             </select>
                           )}
 
@@ -1142,7 +1145,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                               ) : (
                                 <Upload size={16} />
                               )}
-                              Publish YouTube Live
+                              {t("video.publishYoutubeLive", "Publish YouTube Live")}
                             </button>
                           ) : (
                             <button
@@ -1156,7 +1159,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                               ) : (
                                 <Calendar size={16} />
                               )}
-                              Confirm &amp; Schedule
+                              {t("video.confirmSchedule", "Confirm & Schedule")}
                             </button>
                           )}
                         </div>
@@ -1171,7 +1174,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0 flex-1 space-y-1.5 text-left">
                             <span className="text-[9px] font-black tracking-widest text-slate-400 uppercase">
-                              Production Status
+                              {t("video.productionStatus", "Production Status")}
                             </span>
                             <h3 className="text-lg font-black text-slate-900 leading-tight">
                               {selected.youtube_title || selected.topic}
@@ -1184,13 +1187,13 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                               rel="noopener noreferrer"
                               className="inline-flex shrink-0 items-center justify-center gap-1.5 h-10 rounded-2xl bg-red-600 px-5 text-xs font-bold text-white transition-all shadow-md shadow-red-600/20 hover:bg-red-700 hover:shadow-red-600/35 active:scale-95 hover:scale-102"
                             >
-                              Watch Video
+                              {t("video.watchVideo", "Watch Video")}
                               <ExternalLink size={14} />
                             </a>
                           )}
                         </div>
                         <p className="mt-4 text-xs sm:text-sm text-slate-500 leading-relaxed font-medium text-left">
-                          This asset is published. Check daily stats updates and custom AI recommendations below to improve next runs.
+                          {t("video.publishedDesc", "This asset is published. Check daily stats updates and custom AI recommendations below to improve next runs.")}
                         </p>
                       </div>
 
@@ -1199,7 +1202,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                           <div className="flex items-center gap-2">
                             <BarChart3 size={18} className="text-violet-600" />
-                            <h3 className="font-bold text-slate-900 text-sm">Performance Insights</h3>
+                            <h3 className="font-bold text-slate-900 text-sm">{t("video.performanceInsights", "Performance Insights")}</h3>
                           </div>
                           <button
                             type="button"
@@ -1208,14 +1211,14 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                             className="inline-flex items-center gap-2 h-9 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-700 transition hover:bg-slate-50 active:scale-95 disabled:opacity-50"
                           >
                             <RefreshCcw size={12} className={cn(insightsLoading && "animate-spin")} />
-                            Refresh Stats
+                            {t("video.refreshStats", "Refresh Stats")}
                           </button>
                         </div>
 
                         {insightsLoading && !insights && (
                           <div className="flex flex-col items-center gap-2 py-10">
                             <Loader2 size={24} className="animate-spin text-violet-600" />
-                            <p className="text-xs text-slate-500">Querying platform stats…</p>
+                            <p className="text-xs text-slate-500">{t("video.queryingStats", "Querying platform stats…")}</p>
                           </div>
                         )}
 
@@ -1223,10 +1226,11 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                           <div className="space-y-6">
                             <div className="grid grid-cols-3 gap-3">
                               {[
-                                { label: "Views", value: insights.statistics.views, icon: Eye },
-                                { label: "Likes", value: insights.statistics.likes, icon: ThumbsUp },
+                                { label: "Views", labelKey: "views", value: insights.statistics.views, icon: Eye },
+                                { label: "Likes", labelKey: "likes", value: insights.statistics.likes, icon: ThumbsUp },
                                 {
                                   label: "Comments",
+                                  labelKey: "comments",
                                   value: insights.statistics.comments_count,
                                   icon: MessageCircle,
                                 },
@@ -1239,7 +1243,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                                   <p className="text-xl sm:text-2xl font-black font-mono text-slate-900">
                                     {s.value.toLocaleString()}
                                   </p>
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.label}</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("video." + s.labelKey, s.label)}</p>
                                 </div>
                               ))}
                             </div>
@@ -1247,7 +1251,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                             {insights.comments.length > 0 && (
                               <div className="space-y-2 text-left">
                                 <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-                                  Recent Comments
+                                  {t("video.recentComments", "Recent Comments")}
                                 </p>
                                 <ul className="max-h-36 space-y-2 overflow-y-auto dash-scrollbar">
                                   {insights.comments.map((c, i) => (
@@ -1266,18 +1270,18 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                             <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50/50 via-white to-slate-50/30 p-5 space-y-3 text-left">
                               <p className="flex items-center gap-2 font-bold text-violet-900 text-sm">
                                 <Lightbulb size={16} className="text-violet-600 animate-pulse" />
-                                AI Video Recommendations
+                                {t("video.aiRecommendations", "AI Video Recommendations")}
                               </p>
                               <div className="space-y-2 text-xs leading-relaxed text-slate-650 font-medium">
                                 {insights.recommendations.title_improvements && (
                                   <p>
-                                    <strong className="text-slate-800">Title: </strong>
+                                    <strong className="text-slate-800">{t("video.recTitle", "Title: ")}</strong>
                                     {insights.recommendations.title_improvements}
                                   </p>
                                 )}
                                 {insights.recommendations.description_improvements && (
                                   <p>
-                                    <strong className="text-slate-800">Description: </strong>
+                                    <strong className="text-slate-800">{t("video.recDescription", "Description: ")}</strong>
                                     {insights.recommendations.description_improvements}
                                   </p>
                                 )}
@@ -1293,7 +1297,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                                 <div className="pt-2">
                                   <p className="flex items-center gap-1 text-[9px] font-bold tracking-widest text-slate-400 uppercase">
                                     <Hash size={11} />
-                                    Suggested Hashtags
+                                    {t("video.suggestedHashtags", "Suggested Hashtags")}
                                   </p>
                                   <div className="mt-2 flex flex-wrap gap-1.5">
                                     {insights.recommendations.suggested_hashtags.map((tag) => (
@@ -1328,14 +1332,14 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
           ) : !analyticsData ? (
             <div className={cn(panelClass, "flex flex-col items-center py-20 text-center bg-white/40")}>
               <BarChart3 size={40} className="text-slate-300" />
-              <p className="mt-4 font-bold text-slate-700">Could not load dashboard statistics.</p>
+              <p className="mt-4 font-bold text-slate-700">{t("video.couldNotLoadStats", "Could not load dashboard statistics.")}</p>
               <button
                 type="button"
                 onClick={() => void loadAnalytics()}
                 className="mt-4 inline-flex items-center gap-2 h-9 rounded-xl bg-violet-600 px-4 text-xs font-bold text-white hover:bg-violet-700 transition active:scale-95"
               >
                 <RefreshCcw size={13} />
-                Reload
+                {t("video.reload", "Reload")}
               </button>
             </div>
           ) : (
@@ -1344,7 +1348,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <DashCard className="flex flex-col justify-between border border-slate-200/60 shadow-lg p-5">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Total Views</p>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{t("video.totalViews", "Total Views")}</p>
                     <p className="text-3xl font-black font-mono text-slate-800">
                       {analyticsData.summary.total_views.toLocaleString()}
                     </p>
@@ -1353,13 +1357,13 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                     <span className="inline-flex items-center justify-center h-5 rounded-md bg-emerald-50 px-2 text-[10px] font-black text-emerald-700 border border-emerald-100">
                       +{analyticsData.summary.views_growth_pct}%
                     </span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">last 30 days</span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t("video.last30Days", "last 30 days")}</span>
                   </div>
                 </DashCard>
 
                 <DashCard className="flex flex-col justify-between border border-slate-200/60 shadow-lg p-5">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Watch Time</p>
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{t("video.watchTime", "Watch Time")}</p>
                     <p className="text-3xl font-black font-mono text-slate-800">
                       {analyticsData.summary.total_watch_time_hours} hrs
                     </p>
@@ -1368,23 +1372,23 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                     <span className="inline-flex items-center justify-center h-5 rounded-md bg-emerald-50 px-2 text-[10px] font-black text-emerald-700 border border-emerald-100">
                       +{analyticsData.summary.watch_time_growth_pct}%
                     </span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">last 30 days</span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t("video.last30Days", "last 30 days")}</span>
                   </div>
                 </DashCard>
 
                 <DashCard className="flex flex-col justify-between border border-slate-200/60 shadow-lg p-5">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Subscribers</p>
-                    <p className="text-3xl font-black font-mono text-slate-800">
+                    <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{t("video.subscribers", "Subscribers")}</p>
+                    <p className="text-3xl font-black font-mono text-slate-850">
                       {analyticsData.summary.subscribers.toLocaleString()}
                     </p>
                   </div>
                   <div className="mt-4 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center h-5 rounded-md bg-emerald-50 px-2 text-[10px] font-black text-emerald-700 border border-emerald-100">
+                    <span className="inline-flex items-center justify-center h-5 rounded-md bg-emerald-50 px-2 text-[10px] font-black text-emerald-707 border border-emerald-100">
                       +{analyticsData.summary.subscribers_growth_pct}%
                     </span>
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      +{analyticsData.summary.subscribers_growth} net
+                      +{analyticsData.summary.subscribers_growth} {t("video.net", "net")}
                     </span>
                   </div>
                 </DashCard>
@@ -1396,9 +1400,9 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                   <div className="space-y-0.5">
                     <h3 className="font-extrabold text-slate-800 text-base flex items-center gap-2">
                       <TrendingUp className="text-violet-600" size={18} />
-                      Performance Trend
+                      {t("video.performanceTrend", "Performance Trend")}
                     </h3>
-                    <p className="text-[10px] font-semibold text-slate-400">Daily channel stats metrics history</p>
+                    <p className="text-[10px] font-semibold text-slate-400">{t("video.dailyTrendDesc", "Daily channel stats metrics history")}</p>
                   </div>
                   {/* Chart metric slider */}
                   <div className="inline-flex p-0.5 rounded-xl bg-slate-100 border border-slate-200/50">
@@ -1410,7 +1414,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                         chartMetric === "views" ? "bg-white text-slate-900 shadow-sm" : "text-slate-400"
                       )}
                     >
-                      Views Trend
+                      {t("video.viewsTrend", "Views Trend")}
                     </button>
                     <button
                       type="button"
@@ -1420,7 +1424,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
                         chartMetric === "subscribers" ? "bg-white text-slate-900 shadow-sm" : "text-slate-400"
                       )}
                     >
-                      Subscribers
+                      {t("video.subscribers", "Subscribers")}
                     </button>
                   </div>
                 </div>
@@ -1430,7 +1434,7 @@ export const VideoGenerator = ({ seedTopic, onSeedApplied, initialTab }: VideoGe
 
               {/* Comment lists */}
               <div className="space-y-3">
-                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">Patient Comments &amp; Feedback Sentiment</h3>
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wide">{t("video.commentsSentiment", "Patient Comments & Feedback Sentiment")}</h3>
                 <div className="grid grid-cols-1 gap-3">
                   {analyticsData.comments.map((comment: any) => {
                     let sentimentColor = "bg-slate-50 text-slate-600 border-slate-200";

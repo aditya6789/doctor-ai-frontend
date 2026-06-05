@@ -5,6 +5,7 @@ import { Check, Code2, Copy, Link2, Loader2, Mail, Plus, Trash2, Unlink2 } from 
 import { ReviewIntegrationsPanel } from "@/components/integrations/ReviewIntegrationsPanel";
 import { DashAlert } from "@/components/layout/DashboardPrimitives";
 import { API_BASE_URL, bookingApi, chatbotApi, youtubeApi, EmbedWidgetKeyListItem } from "@/lib/api";
+import { useLanguage } from "@/lib/LanguageContext";
 import { cn } from "@/lib/utils";
 
 const panel = "dash-glass rounded-3xl border border-slate-200/50 shadow-sm";
@@ -40,12 +41,12 @@ function buildEmbedSnippet(widgetKey: string) {
 ></script>`;
 }
 
-function StatusPill({ connected, ready }: { connected: boolean; ready?: boolean }) {
+function StatusPill({ connected, ready, t }: { connected: boolean; ready?: boolean; t: (k: string, d: string) => string }) {
   if (ready) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-500/20 shadow-sm shadow-emerald-500/5">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-        Connected
+        {t("integrations.statusReady", "Connected")}
       </span>
     );
   }
@@ -53,13 +54,13 @@ function StatusPill({ connected, ready }: { connected: boolean; ready?: boolean 
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-800 ring-1 ring-amber-500/20 shadow-sm shadow-amber-500/5">
         <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-        Setup needed
+        {t("integrations.statusSetupNeeded", "Setup needed")}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-slate-100/80 px-2.5 py-1 text-[11px] font-bold text-slate-400 ring-1 ring-slate-200/50">
-      Not connected
+      {t("integrations.statusNotConnected", "Not connected")}
     </span>
   );
 }
@@ -71,11 +72,13 @@ function IntegrationCard({
   connected,
   email,
   connectLabel,
+  disconnectLabel,
   onConnect,
   onDisconnect,
   busy,
   accent = "teal",
   className,
+  t,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -83,11 +86,13 @@ function IntegrationCard({
   connected: boolean;
   email?: string;
   connectLabel: string;
+  disconnectLabel: string;
   onConnect: () => void;
   onDisconnect: () => void;
   busy: boolean;
   accent?: "teal" | "red" | "violet";
   className?: string;
+  t: (k: string, d: string) => string;
 }) {
   const brandGlow =
     accent === "red"
@@ -116,7 +121,7 @@ function IntegrationCard({
           <div className="min-w-0 flex-1 space-y-1.5 text-left">
             <div className="flex flex-wrap items-center gap-2.5">
               <h3 className="font-extrabold text-slate-805 text-[16px]">{title}</h3>
-              <StatusPill connected={connected} ready={connected} />
+              <StatusPill connected={connected} ready={connected} t={t} />
             </div>
             <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">{description}</p>
             {connected && email && (
@@ -137,7 +142,7 @@ function IntegrationCard({
               className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 active:scale-95 disabled:opacity-50 shadow-sm"
             >
               <Unlink2 size={14} />
-              Disconnect
+              {disconnectLabel}
             </button>
           ) : (
             <button
@@ -160,6 +165,7 @@ function IntegrationCard({
 }
 
 export const IntegrationsSettings = () => {
+  const { t, language } = useLanguage();
   const [busy, setBusy] = useState(false);
   const [calendarConnected, setCalendarConnected] = useState(false);
   const [calendarEmail, setCalendarEmail] = useState("");
@@ -225,12 +231,12 @@ export const IntegrationsSettings = () => {
   useEffect(() => {
     const onMessage = async (event: MessageEvent) => {
       if (event?.data?.type === "GOOGLE_CALENDAR_CONNECTED") {
-        setMessage("Google Calendar connected.");
+        setMessage(t("integrations.googleCalendarConnected", "Google Calendar connected."));
         setError(null);
         await fetchCalendarStatus();
       }
       if (event?.data?.type === "YOUTUBE_CONNECTED") {
-        setMessage("YouTube connected.");
+        setMessage(t("integrations.youtubeConnected", "YouTube connected."));
         setError(null);
         await fetchYoutubeStatus();
       }
@@ -242,15 +248,15 @@ export const IntegrationsSettings = () => {
   const generateEmbed = async () => {
     setEmbedCreating(true);
     setError(null);
-    const label = newKeyLabel.trim() || "Clinic website";
+    const label = newKeyLabel.trim() || t("integrations.clinicWebsite", "Clinic website");
     try {
       const res = await chatbotApi.createEmbedKey(label);
       setEmbedSnippet(buildEmbedSnippet(res.widget_key));
-      setMessage("Embed code ready — copy it below. The key is shown only once.");
+      setMessage(t("integrations.embedCodeReady", "Embed code ready — copy it below. The key is shown only once."));
       setNewKeyLabel("");
       await fetchKeys();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not create embed key.");
+      setError(err instanceof Error ? err.message : t("integrations.embedKeyError", "Could not create embed key."));
     } finally {
       setEmbedCreating(false);
     }
@@ -261,10 +267,10 @@ export const IntegrationsSettings = () => {
     setError(null);
     try {
       await chatbotApi.revokeEmbedKey(keyId);
-      setMessage("Embed key revoked successfully.");
+      setMessage(t("integrations.revokeSuccess", "Embed key revoked successfully."));
       await fetchKeys();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not revoke embed key.");
+      setError(err instanceof Error ? err.message : t("integrations.revokeError", "Could not revoke embed key."));
     } finally {
       setRevokingKeyId(null);
     }
@@ -277,7 +283,7 @@ export const IntegrationsSettings = () => {
       setEmbedCopied(true);
       setTimeout(() => setEmbedCopied(false), 2000);
     } catch {
-      setError("Could not copy. Select the code and copy manually.");
+      setError(t("integrations.copyError", "Could not copy. Select the code and copy manually."));
     }
   };
 
@@ -290,27 +296,29 @@ export const IntegrationsSettings = () => {
       <div className="grid gap-4 sm:grid-cols-2">
         <IntegrationCard
           icon={<GoogleCalendarIcon />}
-          title="Google Calendar"
-          description="Appointments from your chat widget sync to your calendar."
+          title={t("integrations.googleCalendar", "Google Calendar")}
+          description={t("integrations.googleCalendarDesc", "Appointments from your chat widget sync to your calendar.")}
           connected={calendarConnected}
           email={calendarEmail}
-          connectLabel="Connect"
+          connectLabel={t("integrations.connect", "Connect")}
+          disconnectLabel={t("integrations.disconnect", "Disconnect")}
+          t={t}
           onConnect={() => {
             setError(null);
             try {
               bookingApi.connectGoogleCalendarPopup();
             } catch (err: unknown) {
-              setError(err instanceof Error ? err.message : "Could not open connect window.");
+              setError(err instanceof Error ? err.message : t("integrations.connectError", "Could not open connect window."));
             }
           }}
           onDisconnect={async () => {
             setBusy(true);
             try {
               await bookingApi.disconnectGoogleCalendar();
-              setMessage("Calendar disconnected.");
+              setMessage(t("integrations.calendarDisconnected", "Calendar disconnected."));
               await fetchCalendarStatus();
             } catch {
-              setError("Could not disconnect calendar.");
+              setError(t("integrations.calendarDisconnectError", "Could not disconnect calendar."));
             } finally {
               setBusy(false);
             }
@@ -320,28 +328,30 @@ export const IntegrationsSettings = () => {
 
         <IntegrationCard
           icon={<YoutubeIcon />}
-          title="YouTube"
-          description="Publish videos from Video Studio and track performance."
+          title={t("integrations.youtube", "YouTube")}
+          description={t("integrations.youtubeDesc", "Publish videos from Video Studio and track performance.")}
           connected={youtubeConnected}
           email={youtubeEmail}
-          connectLabel="Connect"
+          connectLabel={t("integrations.connect", "Connect")}
+          disconnectLabel={t("integrations.disconnect", "Disconnect")}
+          t={t}
           accent="red"
           onConnect={() => {
             setError(null);
             try {
               youtubeApi.connectPopup();
             } catch (err: unknown) {
-              setError(err instanceof Error ? err.message : "Could not open connect window.");
+              setError(err instanceof Error ? err.message : t("integrations.connectError", "Could not open connect window."));
             }
           }}
           onDisconnect={async () => {
             setBusy(true);
             try {
               await youtubeApi.disconnect();
-              setMessage("YouTube disconnected.");
+              setMessage(t("integrations.youtubeDisconnected", "YouTube disconnected."));
               await fetchYoutubeStatus();
             } catch {
-              setError("Could not disconnect YouTube.");
+              setError(t("integrations.youtubeDisconnectError", "Could not disconnect YouTube."));
             } finally {
               setBusy(false);
             }
@@ -358,11 +368,11 @@ export const IntegrationsSettings = () => {
                 <Code2 size={26} />
               </div>
               <div className="text-left">
-                <h3 className="font-extrabold text-[16px] text-slate-805">Website chatbot</h3>
+                <h3 className="font-extrabold text-[16px] text-slate-805">{t("integrations.websiteChatbot", "Website chatbot")}</h3>
                 <p className="mt-1.5 max-w-xl text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                  Paste the embed code on your clinic site before{" "}
-                  <code className="rounded-lg bg-slate-100 border border-slate-200 px-1.5 py-0.5 font-mono text-xs font-bold text-slate-600">&lt;/body&gt;</code>. Set
-                  branding in <span className="font-semibold text-slate-700">Profile Settings</span> first.
+                  {t("integrations.embedSnippetDescPre", "Paste the embed code on your clinic site before")}{" "}
+                  <code className="rounded-lg bg-slate-100 border border-slate-200 px-1.5 py-0.5 font-mono text-xs font-bold text-slate-600">&lt;/body&gt;</code>. {t("integrations.embedSnippetDescPost", "Set branding in")}{" "}
+                  <span className="font-semibold text-slate-700">{t("integrations.profileSettings", "Profile Settings")}</span> {t("integrations.embedSnippetDescFirst", "first")}.
                 </p>
               </div>
             </div>
@@ -372,12 +382,12 @@ export const IntegrationsSettings = () => {
           <div className="relative mt-5 flex flex-col gap-3.5 sm:flex-row sm:items-end">
             <div className="flex-1 text-left">
               <label htmlFor="key-label" className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Key Label / Website name
+                {t("integrations.keyLabel", "Key Label / Website name")}
               </label>
               <input
                 id="key-label"
                 type="text"
-                placeholder="e.g. Clinic Website, Landing Page"
+                placeholder={t("integrations.keyLabelPlaceholder", "e.g. Clinic Website, Landing Page")}
                 value={newKeyLabel}
                 onChange={(e) => setNewKeyLabel(e.target.value)}
                 disabled={embedCreating}
@@ -395,14 +405,14 @@ export const IntegrationsSettings = () => {
               ) : (
                 <Plus size={14} />
               )}
-              Generate code
+              {t("integrations.generateCode", "Generate code")}
             </button>
           </div>
 
           {embedSnippet && (
             <div className="relative mt-5 overflow-hidden rounded-2xl border border-violet-200 bg-violet-50/20 p-5 space-y-4 shadow-inner">
               <p className="text-xs font-bold text-violet-800 flex items-center gap-1.5 text-left">
-                <span>⚠️</span> Copy this code now. For security reasons, the widget key will not be shown again.
+                <span>⚠️</span> {t("integrations.embedOnceWarning", "Copy this code now. For security reasons, the widget key will not be shown again.")}
               </p>
               
               {/* Code editor mockup frame */}
@@ -444,14 +454,14 @@ export const IntegrationsSettings = () => {
                   className="inline-flex items-center gap-2 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-2 text-xs font-bold text-teal-805 transition hover:bg-teal-100 active:scale-95 shadow-sm"
                 >
                   {embedCopied ? <Check size={14} className="text-teal-650 animate-pulse" /> : <Copy size={14} />}
-                  {embedCopied ? "Copied!" : "Copy code"}
+                  {embedCopied ? t("integrations.copied", "Copied!") : t("integrations.copyCode", "Copy code")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEmbedSnippet("")}
                   className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 active:scale-95 shadow-sm"
                 >
-                  Done
+                  {t("generic.done", "Done")}
                 </button>
               </div>
             </div>
@@ -459,15 +469,15 @@ export const IntegrationsSettings = () => {
 
           {/* Active keys list */}
           <div className="mt-6 pt-6 border-t border-slate-250/20 text-left">
-            <h4 className="font-extrabold text-slate-800 text-sm mb-3">Active Embed Keys</h4>
+            <h4 className="font-extrabold text-slate-800 text-sm mb-3">{t("integrations.activeKeys", "Active Embed Keys")}</h4>
             {loadingKeys ? (
               <div className="flex items-center justify-center py-8 text-slate-400 gap-2 text-xs font-medium">
                 <Loader2 size={14} className="animate-spin" />
-                Loading active keys...
+                {t("integrations.loadingKeys", "Loading active keys...")}
               </div>
             ) : keys.filter(k => k.is_active).length === 0 ? (
               <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-center text-xs text-slate-550 font-medium">
-                No active embed keys found. Generate a key above to embed the widget.
+                {t("integrations.noActiveKeys", "No active embed keys found. Generate a key above to embed the widget.")}
               </p>
             ) : (
               <div className="overflow-hidden rounded-2xl border border-slate-200/50 bg-white/40 shadow-inner">
@@ -475,11 +485,11 @@ export const IntegrationsSettings = () => {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="border-b border-slate-205/60 bg-slate-50/70 text-[10px] font-extrabold uppercase tracking-wider text-slate-450">
-                        <th className="px-4 py-3">Label</th>
-                        <th className="px-4 py-3">Key Prefix</th>
-                        <th className="px-4 py-3">Created</th>
-                        <th className="px-4 py-3">Last Used</th>
-                        <th className="px-4 py-3 text-right">Action</th>
+                        <th className="px-4 py-3">{t("integrations.labelColumn", "Label")}</th>
+                        <th className="px-4 py-3">{t("integrations.keyPrefix", "Key Prefix")}</th>
+                        <th className="px-4 py-3">{t("integrations.created", "Created")}</th>
+                        <th className="px-4 py-3">{t("integrations.lastUsed", "Last Used")}</th>
+                        <th className="px-4 py-3 text-right">{t("prescription.action", "Action")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-xs">
@@ -487,23 +497,23 @@ export const IntegrationsSettings = () => {
                         .filter(k => k.is_active)
                         .map((k) => (
                           <tr key={k.id} className="hover:bg-slate-50/30 transition-colors">
-                            <td className="px-4 py-3 font-bold text-slate-805">{k.label || "Clinic website"}</td>
+                            <td className="px-4 py-3 font-bold text-slate-805">{k.label || t("integrations.clinicWebsite", "Clinic website")}</td>
                             <td className="px-4 py-3 font-mono text-slate-500">{k.key_prefix}</td>
                             <td className="px-4 py-3 text-slate-450">
-                              {k.created_at ? new Date(k.created_at).toLocaleDateString(undefined, {
+                              {k.created_at ? new Date(k.created_at).toLocaleDateString(language === "hi" ? "hi-IN" : language === "de" ? "de-DE" : "en-US", {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric'
                               }) : "—"}
                             </td>
                             <td className="px-4 py-3 text-slate-450 font-medium">
-                              {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString(undefined, {
+                              {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString(language === "hi" ? "hi-IN" : language === "de" ? "de-DE" : "en-US", {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric',
                                 hour: '2-digit',
                                 minute: '2-digit'
-                              }) : "Never"}
+                              }) : t("integrations.never", "Never")}
                             </td>
                             <td className="px-4 py-3 text-right">
                               <button
@@ -511,14 +521,14 @@ export const IntegrationsSettings = () => {
                                 onClick={() => void revokeKey(k.id)}
                                 disabled={revokingKeyId === k.id}
                                 className="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-red-650 hover:bg-red-50/70 transition-colors disabled:opacity-50"
-                                title="Revoke / Delete Key"
+                                title={t("integrations.revokeTitle", "Revoke / Delete Key")}
                               >
                                 {revokingKeyId === k.id ? (
                                   <Loader2 size={12} className="animate-spin" />
                                 ) : (
                                   <Trash2 size={12} />
                                 )}
-                                Revoke
+                                {t("integrations.revoke", "Revoke")}
                               </button>
                             </td>
                           </tr>
@@ -533,8 +543,8 @@ export const IntegrationsSettings = () => {
       </div>
 
       <p className="text-center text-xs text-slate-400">
-        Chatbot look, clinic details & signature —{" "}
-        <span className="font-semibold text-slate-650">Profile</span>
+        {t("integrations.footerNote", "Chatbot look, clinic details & signature —")}{" "}
+        <span className="font-semibold text-slate-650">{t("integrations.profile", "Profile")}</span>
       </p>
     </div>
   );

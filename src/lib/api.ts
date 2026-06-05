@@ -85,7 +85,7 @@ export async function apiCall(endpoint: string, method: Method = "GET", body: un
   }
 }
 
-export type PreferredLanguage = "hi" | "en" | "hinglish";
+export type PreferredLanguage = "hi" | "en" | "hinglish" | "de";
 
 export interface ChatOutgoingMessage {
   role: "user" | "assistant";

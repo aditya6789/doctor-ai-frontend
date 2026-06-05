@@ -23,6 +23,7 @@ import {
   type PreferredLanguage,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface Message {
   role: "user" | "ai" | "assistant";
@@ -69,6 +70,8 @@ function resolvePrimaryColor(c: ChatbotCustomizationResponse): string {
 }
 
 export const HealthChat = () => {
+  const { language: globalLanguage, setLanguage: setGlobalLanguage, t } = useLanguage();
+
   const [botTitle, setBotTitle] = useState(DEFAULT_BOT_TITLE);
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY);
   const [defaultWelcome, setDefaultWelcome] = useState(DEFAULT_WELCOME);
@@ -122,6 +125,13 @@ export const HealthChat = () => {
         /* keep defaults */
       });
   }, []);
+
+  // Sync global language selector changes down to the chatbot preference
+  useEffect(() => {
+    if (globalLanguage) {
+      setPreferredLanguage(globalLanguage as PreferredLanguage);
+    }
+  }, [globalLanguage]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -239,8 +249,11 @@ export const HealthChat = () => {
       setMessages((prev) => [...prev, { role: "ai", content: data.response }]);
       setQuickReplies(Array.isArray(data.quick_replies) ? data.quick_replies : []);
       setNeedsLanguageChoice(Boolean(data.needs_language_choice));
-      if (data.language === "hi" || data.language === "en" || data.language === "hinglish") {
+      if (data.language === "hi" || data.language === "en" || data.language === "hinglish" || data.language === "de") {
         setPreferredLanguage(data.language);
+        if (data.language !== "hinglish") {
+          setGlobalLanguage(data.language);
+        }
       }
       if (data.show_widget) {
         openBookingWidget(data.booking_action?.prefill_date || undefined);
@@ -268,6 +281,9 @@ export const HealthChat = () => {
   const pickLanguage = (lang: PreferredLanguage) => {
     setPreferredLanguage(lang);
     setNeedsLanguageChoice(false);
+    if (lang === "hi" || lang === "en" || lang === "de") {
+      setGlobalLanguage(lang);
+    }
   };
 
   const downloadEstimatePdf = async () => {
@@ -360,13 +376,13 @@ export const HealthChat = () => {
             <p className="text-base font-bold text-slate-900">{botTitle}</p>
             <p className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
               <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-              Online · Ready to help
+              {t("chat.online", "Online · Ready to help")}
             </p>
             {preferredLanguage && (
               <p className="text-xs text-slate-500">
-                Language:{" "}
+                {t("content.languageTitle", "Language")}:{" "}
                 <span className="font-bold" style={accentStyle}>
-                  {preferredLanguage}
+                  {preferredLanguage === "de" ? "Deutsch" : preferredLanguage === "hi" ? "हिंदी" : preferredLanguage === "en" ? "English" : preferredLanguage}
                 </span>
               </p>
             )}
@@ -375,7 +391,7 @@ export const HealthChat = () => {
         <button
           onClick={clearChat}
           className="rounded-xl border border-slate-200 p-2 text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
-          title="Clear chat"
+          title={t("chat.clear", "Clear chat")}
         >
           <Trash2 size={16} />
         </button>
@@ -419,13 +435,14 @@ export const HealthChat = () => {
 
         {needsLanguageChoice && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-amber-800">Choose language</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-amber-800">{t("chat.chooseLanguage", "Choose language")}</p>
             <div className="flex flex-wrap gap-2">
               {(
                 [
                   { code: "en" as const, label: "English" },
                   { code: "hi" as const, label: "हिंदी" },
                   { code: "hinglish" as const, label: "Hinglish" },
+                  { code: "de" as const, label: "Deutsch" },
                 ] as const
               ).map(({ code, label }) => (
                 <button
@@ -464,7 +481,7 @@ export const HealthChat = () => {
             </div>
             <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-slate-100 bg-slate-50 px-4 py-3">
               <Loader2 size={14} className="animate-spin text-teal-500" />
-              <span className="text-sm text-slate-500">Thinking…</span>
+              <span className="text-sm text-slate-500">{t("chat.thinking", "Thinking...")}</span>
             </div>
           </div>
         )}
@@ -473,11 +490,11 @@ export const HealthChat = () => {
           <div className="rounded-2xl border border-teal-200 bg-teal-50/50 p-4">
             <div className="mb-3 flex items-center gap-2">
               <CalendarDays size={16} className="text-teal-600" />
-              <p className="text-sm font-bold text-slate-800">Quick Booking</p>
+              <p className="text-sm font-bold text-slate-800">{t("chat.bookingTitle", "Quick Booking")}</p>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500">Select date</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500">{t("chat.selectDate", "Select date")}</label>
                 <input
                   type="date"
                   value={bookingDate}
@@ -491,14 +508,14 @@ export const HealthChat = () => {
               </div>
 
               <div>
-                <p className="mb-2 text-xs font-semibold text-slate-500">Available slots</p>
+                <p className="mb-2 text-xs font-semibold text-slate-500">{t("chat.availableSlots", "Available slots")}</p>
                 {slotsLoading ? (
                   <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm text-slate-500">
-                    <Loader2 size={14} className="animate-spin text-teal-500" /> Loading slots...
+                    <Loader2 size={14} className="animate-spin text-teal-500" /> {t("chat.loadingSlots", "Loading slots...")}
                   </div>
                 ) : bookingSlots.length === 0 ? (
                   <div className="rounded-lg bg-white px-3 py-2 text-sm text-slate-500">
-                    No slots available for selected date.
+                    {t("chat.noSlots", "No slots available for selected date.")}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -535,7 +552,7 @@ export const HealthChat = () => {
                   disabled={!selectedSlot || bookingLoading}
                   className="rounded-lg bg-teal-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {bookingLoading ? "Confirming..." : "Confirm Appointment"}
+                  {bookingLoading ? t("chat.confirming", "Confirming...") : t("chat.confirmAppointment", "Confirm Appointment")}
                 </button>
                 <button
                   type="button"
@@ -543,7 +560,7 @@ export const HealthChat = () => {
                   disabled={bookingLoading}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
                 >
-                  Close
+                  {t("chat.close", "Close")}
                 </button>
               </div>
             </div>
@@ -554,22 +571,22 @@ export const HealthChat = () => {
           <div className="rounded-2xl border border-teal-200 bg-teal-50/50 p-4">
             <div className="mb-3 flex items-center gap-2">
               <FileText size={16} className="text-teal-600" />
-              <p className="text-sm font-bold text-slate-800">Request Prescription</p>
+              <p className="text-sm font-bold text-slate-800">{t("chat.requestPrescription", "Request Prescription")}</p>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500">Patient Name</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500">{t("chat.patientName", "Patient Name")}</label>
                 <input
                   type="text"
                   value={prescName}
                   onChange={(e) => setPrescName(e.target.value)}
-                  placeholder="Enter patient name"
+                  placeholder={t("chat.enterPatientName", "Enter patient name")}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-teal-400"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500">Email Address (for delivery)</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500">{t("chat.emailAddress", "Email Address (for delivery)")}</label>
                 <input
                   type="email"
                   value={prescEmail}
@@ -580,11 +597,11 @@ export const HealthChat = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-500">Symptoms & Requested Prescription Details</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500">{t("chat.symptoms", "Symptoms & Requested Prescription Details")}</label>
                 <textarea
                   value={prescSymptoms}
                   onChange={(e) => setPrescSymptoms(e.target.value)}
-                  placeholder="e.g. Cough and throat irritation for 3 days"
+                  placeholder={t("chat.symptomsPlaceholder", "e.g. Cough and throat irritation for 3 days")}
                   rows={3}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-teal-400"
                 />
@@ -603,7 +620,7 @@ export const HealthChat = () => {
                   disabled={!prescName.trim() || !prescEmail.trim() || !prescSymptoms.trim() || prescLoading}
                   className="rounded-lg bg-teal-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {prescLoading ? "Submitting..." : "Submit Prescription Request"}
+                  {prescLoading ? t("chat.submitting", "Submitting...") : t("chat.submitPrescription", "Submit Prescription Request")}
                 </button>
                 <button
                   type="button"
@@ -611,7 +628,7 @@ export const HealthChat = () => {
                   disabled={prescLoading}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
                 >
-                  Close
+                  {t("chat.close", "Close")}
                 </button>
               </div>
             </div>
@@ -655,7 +672,7 @@ export const HealthChat = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && void handleSend()}
-            placeholder="Ask about symptoms, medications, wellness…"
+            placeholder={t("chat.inputPlaceholder", "Ask about symptoms, medications, wellness...")}
             className="flex-1 bg-transparent text-[15px] text-slate-800 outline-none placeholder:text-slate-400"
           />
 
@@ -670,7 +687,7 @@ export const HealthChat = () => {
           </button>
         </div>
         <p className="mt-2 text-center text-[10px] text-slate-400">
-          AI responses are for informational purposes only. Always consult a doctor for medical advice.
+          {t("chat.warning", "AI responses are for informational purposes only. Always consult a doctor for medical advice.")}
         </p>
       </div>
     </div>

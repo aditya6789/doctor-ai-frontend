@@ -17,22 +17,20 @@ import {
 import { DashAlert } from "@/components/layout/DashboardPrimitives";
 import { bookingApi, type ClinicAppointment } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+function getMonthName(monthIdx: number, lang: string) {
+  const d = new Date(2026, monthIdx, 1);
+  return d.toLocaleDateString(lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US", { month: "long" });
+}
+function getShortMonthName(monthIdx: number, lang: string) {
+  const d = new Date(2026, monthIdx, 1);
+  return d.toLocaleDateString(lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US", { month: "short" });
+}
+function getWeekdayName(dayIdx: number, lang: string) {
+  const d = new Date(2026, 4, dayIdx + 4); // dayIdx=0 is Monday (May 4, 2026)
+  return d.toLocaleDateString(lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US", { weekday: "short" });
+}
 
 const panel = "dash-glass rounded-3xl border border-slate-200/50 shadow-sm";
 
@@ -53,8 +51,8 @@ function parseDateStr(s: string) {
   return new Date(y, m - 1, d);
 }
 
-function formatDisplayDate(s: string) {
-  return parseDateStr(s).toLocaleDateString(undefined, {
+function formatDisplayDate(s: string, lang: string) {
+  return parseDateStr(s).toLocaleDateString(lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -62,8 +60,8 @@ function formatDisplayDate(s: string) {
   });
 }
 
-function formatShortWeekday(s: string) {
-  return parseDateStr(s).toLocaleDateString(undefined, { weekday: "short" });
+function formatShortWeekday(s: string, lang: string) {
+  return parseDateStr(s).toLocaleDateString(lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US", { weekday: "short" });
 }
 
 function getCalendarCells(year: number, month: number) {
@@ -232,6 +230,7 @@ function StatPill({
 }
 
 export const ConsultationBooking = () => {
+  const { t, language } = useLanguage();
   const today = useMemo(() => new Date(), []);
   const todayStr = toDateStr(today);
   const todayStart = useMemo(
@@ -255,12 +254,12 @@ export const ConsultationBooking = () => {
       const res = await bookingApi.getClinicAppointments({ month: monthKey(year, month) });
       setAppointments(res.appointments ?? []);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not load schedule.");
+      setError(err instanceof Error ? err.message : t("booking.cancelError", "Could not load schedule."));
       setAppointments([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadMonth(viewYear, viewMonth);
@@ -329,10 +328,10 @@ export const ConsultationBooking = () => {
     setError(null);
     try {
       await bookingApi.cancelClinicAppointment(appointmentId);
-      setMessage("Consultation cancelled.");
+      setMessage(t("booking.cancelAlert", "Consultation cancelled."));
       await loadMonth(viewYear, viewMonth);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not cancel.");
+      setError(err instanceof Error ? err.message : t("booking.cancelError", "Could not cancel."));
     } finally {
       setCancellingId(null);
     }
@@ -347,12 +346,12 @@ export const ConsultationBooking = () => {
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] font-bold tracking-[0.2em] text-teal-600 uppercase">Clinic</p>
+          <p className="text-[11px] font-bold tracking-[0.2em] text-teal-600 uppercase">{t("sidebar.clinic", "Clinic")}</p>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Consultations
+            {t("booking.title", "Consultations")}
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            {MONTHS[viewMonth]} {viewYear} · {monthTotal} booking{monthTotal === 1 ? "" : "s"}
+            {getMonthName(viewMonth, language)} {viewYear} · {monthTotal} {t("booking.booked", "bookings")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -362,7 +361,7 @@ export const ConsultationBooking = () => {
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-teal-300 hover:text-teal-700"
           >
             <Sparkles size={16} className="text-teal-500" />
-            Jump to today
+            {t("booking.jumpToToday", "Jump to today")}
           </button>
           <button
             type="button"
@@ -371,7 +370,7 @@ export const ConsultationBooking = () => {
             className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-teal-600/25 transition hover:bg-teal-700 disabled:opacity-50"
           >
             <RefreshCcw size={16} className={cn(loading && "animate-spin")} />
-            Sync
+            {t("booking.sync", "Sync")}
           </button>
         </div>
       </div>
@@ -379,23 +378,23 @@ export const ConsultationBooking = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatPill
-          label="Today"
+          label={t("booking.today", "Today")}
           value={String(todayCount)}
-          sub={formatShortWeekday(todayStr)}
+          sub={formatShortWeekday(todayStr, language)}
           accent="teal"
           icon={CalendarDays}
         />
         <StatPill
-          label="Selected day"
+          label={t("booking.selectedDay", "Selected day")}
           value={String(selectedList.length)}
-          sub={selectedDate === todayStr ? "Today" : formatShortWeekday(selectedDate)}
+          sub={selectedDate === todayStr ? t("booking.today", "Today") : formatShortWeekday(selectedDate, language)}
           accent="violet"
           icon={Clock}
         />
         <StatPill
-          label="This month"
+          label={t("booking.thisMonth", "This month")}
           value={String(monthTotal)}
-          sub={`${MONTHS[viewMonth]} ${viewYear}`}
+          sub={`${getMonthName(viewMonth, language)} ${viewYear}`}
           accent="slate"
           icon={Stethoscope}
         />
@@ -408,10 +407,10 @@ export const ConsultationBooking = () => {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-                  Calendar
+                  {t("booking.calendar", "Calendar")}
                 </p>
                 <h3 className="text-lg font-bold text-slate-900">
-                  {MONTHS[viewMonth]}{" "}
+                  {getMonthName(viewMonth, language)}{" "}
                   <span className="font-semibold text-slate-400">{viewYear}</span>
                 </h3>
               </div>
@@ -438,12 +437,12 @@ export const ConsultationBooking = () => {
 
           <div className="p-4 sm:p-5">
             <div className="mb-2 grid grid-cols-7 gap-1.5">
-              {WEEKDAYS.map((d) => (
+              {Array.from({ length: 7 }).map((_, idx) => (
                 <div
-                  key={d}
+                  key={idx}
                   className="py-1 text-center text-[10px] font-bold tracking-wider text-slate-400 uppercase"
                 >
-                  {d}
+                  {getWeekdayName(idx, language)}
                 </div>
               ))}
             </div>
@@ -490,7 +489,7 @@ export const ConsultationBooking = () => {
                         )}
                       >
                         {Array.from({ length: Math.min(count, 3) }).map((_, i) => (
-                          <span
+                           <span
                             key={i}
                             className={cn(
                               "h-1 w-1 rounded-full",
@@ -508,15 +507,15 @@ export const ConsultationBooking = () => {
             <div className="mt-4 flex flex-wrap items-center justify-center gap-4 border-t border-slate-100 pt-4 text-[10px] font-semibold text-slate-500">
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-linear-to-br from-teal-500 to-cyan-500" />
-                Selected
+                {t("booking.selected", "Selected")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-teal-200 ring-2 ring-teal-400/40" />
-                Today
+                {t("booking.today", "Today")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-violet-500" />
-                Has bookings
+                {t("booking.hasBookings", "Has bookings")}
               </span>
             </div>
           </div>
@@ -529,10 +528,10 @@ export const ConsultationBooking = () => {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/50 px-5 py-4 sm:px-6">
               <div className="min-w-0">
                 <p className="text-[10px] font-bold tracking-wider text-teal-600 uppercase">
-                  Day schedule
+                  {t("booking.daySchedule", "Day schedule")}
                 </p>
                 <h3 className="mt-0.5 truncate text-lg font-bold text-slate-900 sm:text-xl">
-                  {formatDisplayDate(selectedDate)}
+                  {formatDisplayDate(selectedDate, language)}
                 </h3>
               </div>
               {!loading && (
@@ -544,7 +543,7 @@ export const ConsultationBooking = () => {
                       : "bg-slate-200 text-slate-600"
                   )}
                 >
-                  {selectedList.length} booked
+                  {selectedList.length} {t("booking.booked", "booked")}
                 </span>
               )}
             </div>
@@ -553,14 +552,14 @@ export const ConsultationBooking = () => {
               {loading ? (
                 <div className="flex flex-col items-center gap-3 py-14">
                   <Loader2 size={28} className="animate-spin text-teal-600" />
-                  <p className="text-sm text-slate-500">Loading schedule…</p>
+                  <p className="text-sm text-slate-500">{t("booking.loading", "Loading schedule…")}</p>
                 </div>
               ) : selectedList.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-12 text-center">
                   <CalendarDays size={32} className="mx-auto text-slate-300" />
-                  <p className="mt-4 font-semibold text-slate-800">No appointments</p>
+                  <p className="mt-4 font-semibold text-slate-800">{t("booking.noAppointments", "No appointments")}</p>
                   <p className="mt-1 text-sm text-slate-500">
-                    Bookings from Health Chat will appear here.
+                    {t("booking.noAppointmentsSub", "Bookings from Health Chat will appear here.")}
                   </p>
                 </div>
               ) : (
@@ -589,14 +588,14 @@ export const ConsultationBooking = () => {
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-bold tracking-wider text-violet-600 uppercase">
-                    Upcoming
+                    {t("booking.upcoming", "Upcoming")}
                   </p>
                   <h3 className="text-base font-bold text-slate-900">
-                    Next days with appointments
+                    {t("booking.nextDays", "Next days with appointments")}
                   </h3>
                 </div>
                 <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-800">
-                  {upcomingDates.length} day{upcomingDates.length === 1 ? "" : "s"}
+                  {upcomingDates.length} {upcomingDates.length === 1 ? t("booking.booked", "day") : t("booking.booked", "days")}
                 </span>
               </div>
 
@@ -623,8 +622,8 @@ export const ConsultationBooking = () => {
                           isActive ? "text-teal-100" : "text-slate-400"
                         )}
                       >
-                        {formatShortWeekday(date)}
-                        {isToday ? " · Today" : ""}
+                        {formatShortWeekday(date, language)}
+                        {isToday ? " · " + t("booking.today", "Today") : ""}
                       </p>
                       <p
                         className={cn(
@@ -640,7 +639,7 @@ export const ConsultationBooking = () => {
                           isActive ? "text-teal-200" : "text-slate-400"
                         )}
                       >
-                        {MONTHS[d.getMonth()]?.slice(0, 3)}
+                        {getShortMonthName(d.getMonth(), language)}
                       </p>
                       <div
                         className={cn(
@@ -650,7 +649,7 @@ export const ConsultationBooking = () => {
                             : "bg-violet-50 text-violet-700"
                         )}
                       >
-                        {list.length} booking{list.length === 1 ? "" : "s"}
+                        {list.length} {list.length === 1 ? t("booking.booked", "booking") : t("booking.booked", "bookings")}
                       </div>
                     </button>
                   );
@@ -661,9 +660,9 @@ export const ConsultationBooking = () => {
 
           {!loading && monthTotal === 0 && (
             <div className="rounded-2xl border border-dashed border-slate-200/90 bg-slate-50/50 px-6 py-8 text-center">
-              <p className="font-semibold text-slate-700">No consultations this month yet</p>
+              <p className="font-semibold text-slate-700">{t("booking.noConsultsMonth", "No consultations this month yet")}</p>
               <p className="mt-1 text-sm text-slate-500">
-                New bookings from Health Chat will show on the calendar automatically.
+                {t("booking.noConsultsMonthSub", "New bookings from Health Chat will show on the calendar automatically.")}
               </p>
             </div>
           )}

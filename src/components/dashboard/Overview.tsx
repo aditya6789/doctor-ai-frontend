@@ -20,6 +20,7 @@ import {
   Video,
 } from "lucide-react";
 import { DashAlert, DashCard, DashStatCard } from "@/components/layout/DashboardPrimitives";
+import { useLanguage } from "@/lib/LanguageContext";
 import {
   barWidthForValue,
   fetchDashboardData,
@@ -40,18 +41,20 @@ const activityIcons = {
   message: Sparkles,
 } as const;
 
-function formatToday() {
-  return new Intl.DateTimeFormat("en-US", {
+function formatToday(lang: string) {
+  const locale = lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US";
+  return new Intl.DateTimeFormat(locale, {
     weekday: "long",
     month: "short",
     day: "numeric",
   }).format(new Date());
 }
 
-function formatApptDate(dateStr: string) {
+function formatApptDate(dateStr: string, lang: string) {
   const d = new Date(dateStr + "T12:00:00");
   if (Number.isNaN(d.getTime())) return dateStr;
-  return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" }).format(d);
+  const locale = lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US";
+  return new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric" }).format(d);
 }
 
 function formatStatValue(n: number | null | undefined, loading: boolean) {
@@ -161,6 +164,7 @@ export const DashboardOverview = ({
   user?: DashboardUser;
   onNavigate?: (section: string) => void;
 }) => {
+  const { language, t } = useLanguage();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -183,7 +187,7 @@ export const DashboardOverview = ({
   }, [load]);
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12 ? t("overview.goodMorning", "Good morning") : hour < 17 ? t("overview.goodAfternoon", "Good afternoon") : t("overview.goodEvening", "Good evening");
   const firstName = user?.name?.split(" ")[0] || "Doctor";
 
   const stats = data?.stats;
@@ -192,7 +196,7 @@ export const DashboardOverview = ({
 
   const statCards = [
     {
-      label: "This month",
+      label: t("overview.thisMonthStat", "This month"),
       value: formatStatValue(stats?.consultationsThisMonth, loading),
       icon: Users,
       gradient: "from-teal-500 to-cyan-500",
@@ -200,7 +204,7 @@ export const DashboardOverview = ({
       className: "dash-animate-in dash-stagger-1 hover:border-teal-300 hover:shadow-xl hover:shadow-teal-500/5",
     },
     {
-      label: "Video library",
+      label: t("overview.videoLibrary", "Video library"),
       value: formatStatValue(stats?.videosTotal, loading),
       icon: Video,
       gradient: "from-violet-500 to-indigo-500",
@@ -208,7 +212,7 @@ export const DashboardOverview = ({
       className: "dash-animate-in dash-stagger-2 hover:border-violet-300 hover:shadow-xl hover:shadow-violet-500/5",
     },
     {
-      label: "Replied",
+      label: t("overview.replied", "Replied"),
       value: formatStatValue(stats?.reviewsReplied, loading),
       icon: Star,
       gradient: "from-amber-500 to-orange-500",
@@ -216,7 +220,7 @@ export const DashboardOverview = ({
       className: "dash-animate-in dash-stagger-3 hover:border-amber-300 hover:shadow-xl hover:shadow-amber-500/5",
     },
     {
-      label: "Avg. rating",
+      label: t("overview.avgRating", "Avg. rating"),
       value: loading ? "—" : stats?.averageRating != null ? String(stats.averageRating) : "—",
       suffix: stats?.averageRating != null ? "/5" : undefined,
       icon: HeartPulse,
@@ -246,7 +250,7 @@ export const DashboardOverview = ({
               className="inline-flex items-center gap-1.5 rounded-lg bg-white/80 px-3 py-1.5 text-xs font-bold text-red-700"
             >
               <RefreshCcw size={14} />
-              Retry
+              {t("overview.retry", "Retry")}
             </button>
           </div>
         </DashAlert>
@@ -262,20 +266,20 @@ export const DashboardOverview = ({
             <div className="max-w-lg">
               <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-teal-205 badge-animated uppercase tracking-wider">
                 <Sparkles size={12} className="text-teal-300 animate-spin-slow" />
-                {greeting} · {formatToday()}
+                {greeting} · {formatToday(language)}
               </div>
               <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
-                Welcome back,{" "}
+                {t("overview.welcome", "Welcome back,")}{" "}
                 <span className="bg-linear-to-r from-teal-200 via-cyan-200 to-emerald-200 bg-clip-text text-transparent">
                   {firstName}
                 </span>
               </h1>
-              <p className="mt-2 text-sm leading-relaxed text-slate-350 font-medium">
+              <p className="mt-2 text-sm leading-relaxed text-slate-355 font-medium">
                 {loading
-                  ? "Loading your clinic overview…"
+                  ? t("overview.loading", "Loading your clinic overview…")
                   : data?.summaryLine
                     ? `${data.summaryLine}. ${data.summarySub}`
-                    : "Your live clinic overview"}
+                    : t("overview.liveOverview", "Your live clinic overview")}
               </p>
             </div>
 
@@ -286,7 +290,7 @@ export const DashboardOverview = ({
                 className="hidden items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white/90 transition hover:bg-white/20 sm:inline-flex"
               >
                 <PlugZap size={14} />
-                Integrations
+                {t("sidebar.integrations", "Integrations")}
               </button>
               <button
                 type="button"
@@ -321,22 +325,22 @@ export const DashboardOverview = ({
 
           <div className="flex flex-wrap gap-2">
             <HeroStatPill
-              label="Today"
+              label={t("overview.today", "Today")}
               value={String(stats?.consultationsToday ?? 0)}
               loading={loading}
             />
             <HeroStatPill
-              label="This month"
+              label={t("overview.thisMonthStat", "This month")}
               value={String(stats?.consultationsThisMonth ?? 0)}
               loading={loading}
             />
             <HeroStatPill
-              label="Pending reviews"
+              label={t("overview.pendingReviews", "Pending reviews")}
               value={String(stats?.pendingReplies ?? 0)}
               loading={loading}
             />
             <HeroStatPill
-              label="Rating"
+              label={t("overview.rating", "Rating")}
               value={stats?.averageRating != null ? String(stats.averageRating) : "—"}
               loading={loading}
             />
@@ -353,11 +357,11 @@ export const DashboardOverview = ({
                 <CalendarDays size={18} />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900">Today&apos;s schedule</h3>
+                <h3 className="font-bold text-slate-900">{t("overview.schedule", "Today's schedule")}</h3>
                 <p className="text-xs text-slate-500">
                   {loading
-                    ? "Loading…"
-                    : `${data?.todayAppointments.length ?? 0} appointment${(data?.todayAppointments.length ?? 0) === 1 ? "" : "s"}`}
+                    ? t("generic.loading", "Loading...")
+                    : `${data?.todayAppointments.length ?? 0} ${t((data?.todayAppointments.length ?? 0) === 1 ? "overview.appointment" : "overview.appointments")}`}
                 </p>
               </div>
             </div>
@@ -366,7 +370,7 @@ export const DashboardOverview = ({
               onClick={() => onNavigate?.("booking")}
               className="text-xs font-bold text-teal-600 hover:text-teal-700"
             >
-              Calendar
+              {t("overview.calendar", "Calendar")}
             </button>
           </div>
 
@@ -376,8 +380,8 @@ export const DashboardOverview = ({
             </div>
           ) : !data?.todayAppointments.length ? (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center">
-              <p className="text-sm font-medium text-slate-600">No appointments today</p>
-              <p className="mt-1 text-xs text-slate-400">Bookings from your website chat will appear here</p>
+              <p className="text-sm font-medium text-slate-600">{t("overview.noAppointments", "No appointments today")}</p>
+              <p className="mt-1 text-xs text-slate-400">{t("overview.noAppointmentsSub", "Bookings from your website chat will appear here")}</p>
             </div>
           ) : (
             <ul className="space-y-2">
@@ -396,7 +400,7 @@ export const DashboardOverview = ({
                       <p className="text-xs text-slate-500">{a.time_slot || "Time TBD"}</p>
                     </div>
                     <span className="rounded-lg bg-teal-500/10 px-2 py-1 text-[10px] font-bold text-teal-700">
-                      Today
+                      {t("overview.today", "Today")}
                     </span>
                   </button>
                 </li>
@@ -411,8 +415,8 @@ export const DashboardOverview = ({
               <AlertCircle size={18} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900">Needs attention</h3>
-              <p className="text-xs text-slate-500">Action items for your clinic</p>
+              <h3 className="font-bold text-slate-900">{t("overview.needsAttention", "Needs attention")}</h3>
+              <p className="text-xs text-slate-500">{t("overview.actionItems", "Action items for your clinic")}</p>
             </div>
           </div>
 
@@ -424,8 +428,8 @@ export const DashboardOverview = ({
             <div className="flex items-center gap-3 rounded-2xl border border-emerald-200/80 bg-emerald-50/50 px-4 py-6">
               <CheckCircle2 className="shrink-0 text-emerald-600" size={28} />
               <div>
-                <p className="text-sm font-bold text-emerald-900">All caught up</p>
-                <p className="text-xs text-emerald-700/80">No urgent tasks right now</p>
+                <p className="text-sm font-bold text-emerald-900">{t("overview.allCaughtUp", "All caught up")}</p>
+                <p className="text-xs text-emerald-700/80">{t("overview.allCaughtUpSub", "No urgent tasks right now")}</p>
               </div>
             </div>
           ) : (
@@ -461,13 +465,13 @@ export const DashboardOverview = ({
         <DashCard className="dash-animate-in lg:col-span-7" padding="lg" hover>
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Bookings this week</h3>
-              <p className="text-sm text-slate-500">Last 7 days · confirmed</p>
+              <h3 className="text-lg font-bold text-slate-900">{t("overview.bookingsThisWeek", "Bookings this week")}</h3>
+              <p className="text-sm text-slate-500">{t("overview.last7Days", "Last 7 days · confirmed")}</p>
             </div>
             {!loading && data && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/10 px-3 py-1.5 text-xs font-bold text-teal-700">
                 <TrendingUp size={14} />
-                {data.weekTotal} total
+                {data.weekTotal} {t("overview.total", "total")}
               </span>
             )}
           </div>
@@ -498,14 +502,14 @@ export const DashboardOverview = ({
 
         <DashCard className="dash-animate-in lg:col-span-5" padding="lg" hover>
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-slate-900">Recent activity</h3>
+            <h3 className="text-lg font-bold text-slate-900">{t("overview.recentActivity", "Recent activity")}</h3>
           </div>
           {loading ? (
             <div className="flex justify-center py-14">
               <Loader2 className="animate-spin text-teal-600" />
             </div>
           ) : !data?.activities.length ? (
-            <p className="py-10 text-center text-sm text-slate-500">Activity will appear as you get bookings and reviews.</p>
+            <p className="py-10 text-center text-sm text-slate-500">{t("overview.noActivity", "Activity will appear as you get bookings and reviews.")}</p>
           ) : (
             <div className="max-h-[280px] space-y-0.5 overflow-y-auto dash-scrollbar pr-1">
               {data.activities.map((a, i) => (
@@ -524,8 +528,8 @@ export const DashboardOverview = ({
               <User size={18} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900">Upcoming patients</h3>
-              <p className="text-xs text-slate-500">Next confirmed bookings</p>
+              <h3 className="font-bold text-slate-900">{t("overview.upcomingPatients", "Upcoming patients")}</h3>
+              <p className="text-xs text-slate-500">{t("overview.nextConfirmed", "Next confirmed bookings")}</p>
             </div>
           </div>
           <button
@@ -533,7 +537,7 @@ export const DashboardOverview = ({
             onClick={() => onNavigate?.("booking")}
             className="text-xs font-bold text-teal-600 hover:text-teal-700"
           >
-            View all
+            {t("overview.viewAll", "View all")}
           </button>
         </div>
 
@@ -542,7 +546,7 @@ export const DashboardOverview = ({
             <Loader2 className="animate-spin text-violet-600" />
           </div>
         ) : !data?.upcomingAppointments.length ? (
-          <p className="text-center text-sm text-slate-500 py-6">No upcoming appointments scheduled.</p>
+          <p className="text-center text-sm text-slate-500 py-6">{t("overview.noUpcoming", "No upcoming appointments scheduled.")}</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {data.upcomingAppointments.map((a) => (
@@ -555,7 +559,7 @@ export const DashboardOverview = ({
                 <p className="truncate text-sm font-bold text-slate-900">{a.patient_name}</p>
                 <p className="mt-1 text-xs font-semibold text-teal-700">{a.time_slot}</p>
                 <p className="mt-0.5 text-[11px] text-slate-500">
-                  {a.isToday ? "Today" : formatApptDate(a.date)}
+                  {a.isToday ? t("overview.today", "Today") : formatApptDate(a.date, language)}
                 </p>
               </button>
             ))}
@@ -576,9 +580,9 @@ export const DashboardOverview = ({
             </div>
             <div>
               <p className="text-sm font-bold text-slate-900">
-                {stats.videoDrafts} video draft{stats.videoDrafts === 1 ? "" : "s"} ready to publish
+                {stats.videoDrafts} {t("overview.videoDraftsReady", "video draft(s) ready to publish")}
               </p>
-              <p className="text-xs text-slate-600">Open Video Studio to upload to YouTube</p>
+              <p className="text-xs text-slate-600">{t("overview.videoDraftsSub", "Open Video Studio to upload to YouTube")}</p>
             </div>
           </div>
           <ChevronRight className="shrink-0 text-violet-600" size={22} />

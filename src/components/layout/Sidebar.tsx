@@ -18,6 +18,8 @@ import {
   FileText,
 } from "lucide-react";
 
+import { useLanguage } from "@/lib/LanguageContext";
+
 interface SidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
@@ -27,33 +29,35 @@ interface SidebarProps {
 
 const navGroups = [
   {
-    label: "Overview",
-    items: [{ id: "dash", label: "Dashboard", icon: LayoutDashboard }],
+    labelKey: "sidebar.overview",
+    items: [{ id: "dash", labelKey: "sidebar.dashboard", icon: LayoutDashboard }],
   },
   {
-    label: "Clinic",
+    labelKey: "sidebar.clinic",
     items: [
-      { id: "profile", label: "Profile", icon: UserCircle },
-      { id: "booking", label: "Consultations", icon: CalendarDays },
-      { id: "reviews", label: "Reviews", icon: Star },
-      { id: "prescriptions", label: "Prescriptions", icon: FileText },
+      { id: "profile", labelKey: "sidebar.profile", icon: UserCircle },
+      { id: "booking", labelKey: "sidebar.consultations", icon: CalendarDays },
+      { id: "reviews", labelKey: "sidebar.reviews", icon: Star },
+      { id: "prescriptions", labelKey: "sidebar.prescriptions", icon: FileText },
     ],
   },
   {
-    label: "AI Studio",
+    labelKey: "sidebar.aistudio",
     items: [
-      { id: "content", label: "Content Engine", icon: PenLine },
-      { id: "video", label: "Video Studio", icon: Video },
-      { id: "yt-analytics", label: "YouTube Analytics", icon: BarChart3 },
+      { id: "content", labelKey: "sidebar.contentengine", icon: PenLine },
+      { id: "video", labelKey: "sidebar.videostudio", icon: Video },
+      { id: "yt-analytics", labelKey: "sidebar.analytics", icon: BarChart3 },
     ],
   },
   {
-    label: "Connect",
-    items: [{ id: "integrations", label: "Integrations", icon: PlugZap }],
+    labelKey: "sidebar.connect",
+    items: [{ id: "integrations", labelKey: "sidebar.integrations", icon: PlugZap }],
   },
 ];
 
 export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: SidebarProps) => {
+  const { t } = useLanguage();
+
   return (
     <aside className="dash-sidebar-glow relative flex h-screen w-[18rem] shrink-0 flex-col bg-[#0c1222] text-slate-300">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -64,10 +68,10 @@ export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: Side
       <div className="relative border-b border-white/[0.06] px-5 py-5">
         <div className="space-y-2">
           <BrandLogo
-            variant="full"
-            href="/dashboard"
-            size="xl"
-            imageClassName="w-full max-w-[220px] rounded-xl bg-white p-2.5 shadow-sm"
+             variant="full"
+             href="/dashboard"
+             size="xl"
+             imageClassName="w-full max-w-[220px] rounded-xl bg-white p-2.5 shadow-sm"
           />
           <p className="flex items-center gap-1.5 pl-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
             <Sparkles size={9} className="text-teal-400/90" />
@@ -78,12 +82,12 @@ export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: Side
 
       <nav className="dash-scrollbar relative flex-1 space-y-7 overflow-y-auto px-3 py-6">
         {navGroups.map((group) => (
-          <div key={group.label}>
+          <div key={group.labelKey}>
             <p className="mb-2.5 px-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
-              {group.label}
+              {t(group.labelKey)}
             </p>
             <div className="space-y-1">
-              {group.items.map(({ id, label, icon: Icon }) => {
+              {group.items.map(({ id, labelKey, icon: Icon }) => {
                 const active = activeSection === id;
                 return (
                   <button
@@ -107,7 +111,7 @@ export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: Side
                     >
                       <Icon size={17} strokeWidth={active ? 2.25 : 2} />
                     </span>
-                    <span className="flex-1 truncate">{label}</span>
+                    <span className="flex-1 truncate">{t(labelKey)}</span>
                     {active && (
                       <ChevronRight
                         size={14}
@@ -139,7 +143,7 @@ export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: Side
             </div>
           </div>
           <div className="mt-3 flex items-center justify-between rounded-xl bg-teal-500/10 px-3 py-2">
-            <span className="text-[11px] font-semibold text-teal-200/90">Pro workspace</span>
+            <span className="text-[11px] font-semibold text-teal-200/90">{t("sidebar.pro", "Pro workspace")}</span>
             <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-emerald-400" />
           </div>
         </div>
@@ -149,7 +153,7 @@ export const Sidebar = ({ activeSection, onSectionChange, onLogout, user }: Side
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[13px] font-semibold text-slate-500 transition hover:border-red-500/20 hover:bg-red-500/10 hover:text-red-300"
         >
           <LogOut size={16} />
-          Sign out
+          {t("sidebar.signout", "Sign out")}
         </button>
       </div>
     </aside>

@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 import {
   ArrowRight,
   BarChart3,
@@ -106,31 +107,32 @@ function AuthorAvatar({
   );
 }
 
-function formatRelativeTime(iso?: string | null): string {
-  if (!iso) return "Recently";
+function formatRelativeTime(iso?: string | null, lang?: string): string {
+  if (!iso) return lang === "hi" ? "हाल ही में" : lang === "de" ? "Vor kurzem" : "Recently";
   try {
     const d = new Date(iso);
     const diff = Date.now() - d.getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "Just now";
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return lang === "hi" ? "अभी-अभी" : lang === "de" ? "Gerade eben" : "Just now";
+    if (mins < 60) return lang === "hi" ? `${mins} मिनट पहले` : lang === "de" ? `vor ${mins} Min.` : `${mins}m ago`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
+    if (hrs < 24) return lang === "hi" ? `${hrs} घंटे पहले` : lang === "de" ? `vor ${hrs} Std.` : `${hrs}h ago`;
     const days = Math.floor(hrs / 24);
-    if (days < 7) return `${days}d ago`;
-    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    if (days < 7) return lang === "hi" ? `${days} दिन पहले` : lang === "de" ? `vor ${days} Tagen` : `${days}d ago`;
+    const locale = lang === "hi" ? "hi-IN" : lang === "de" ? "de-DE" : "en-US";
+    return d.toLocaleDateString(locale, { month: "short", day: "numeric" });
   } catch {
     return iso;
   }
 }
 
-function computeSentiment(list: ReviewItemV1[]) {
+function computeSentiment(list: ReviewItemV1[], t?: (k: string, d: string) => string) {
   if (!list.length) {
     return {
       positive: 0,
       neutral: 0,
       negative: 0,
-      label: "No data yet",
+      label: t ? t("reviews.noDataYet", "No data yet") : "No data yet",
       avg: 0,
       counts: { positive: 0, neutral: 0, negative: 0, total: 0 },
     };
@@ -149,10 +151,10 @@ function computeSentiment(list: ReviewItemV1[]) {
   const neutral = Math.round((neu / total) * 100);
   const negative = Math.round((neg / total) * 100);
   const avg = list.reduce((s, r) => s + (r.rating || 0), 0) / total;
-  let label = "Mixed";
-  if (positive >= 70) label = "Highly positive";
-  else if (positive >= 50) label = "Mostly positive";
-  else if (negative >= 30) label = "Needs attention";
+  let label = t ? t("reviews.mixed", "Mixed") : "Mixed";
+  if (positive >= 70) label = t ? t("reviews.highlyPositive", "Highly positive") : "Highly positive";
+  else if (positive >= 50) label = t ? t("reviews.mostlyPositive", "Mostly positive") : "Mostly positive";
+  else if (negative >= 30) label = t ? t("reviews.needsAttention", "Needs attention") : "Needs attention";
 
   return {
     positive,
@@ -249,6 +251,7 @@ function ReviewListItem({
   hasReply: boolean;
   onSelect: () => void;
 }) {
+  const { t, language } = useLanguage();
   const provider = review.provider === "meta" ? PROVIDER.meta : PROVIDER.google;
   const ProviderIcon = provider.icon;
   const needsAttention = !hasReply && review.rating <= 2;
@@ -270,11 +273,11 @@ function ReviewListItem({
         <div className="flex items-center gap-1.5">
           <StarRow rating={review.rating} size={10} />
           <span className="text-[10px] font-semibold text-slate-400">
-            {formatRelativeTime(review.create_time)}
+            {formatRelativeTime(review.create_time, language)}
           </span>
         </div>
         <p className="line-clamp-2 text-[10px] leading-snug text-slate-500">
-          {review.content || "No review text"}
+          {review.content || t("reviews.noContent", "No description text provided by user.")}
         </p>
         <span
           className={cn(
@@ -283,7 +286,7 @@ function ReviewListItem({
           )}
         >
           <ProviderIcon size={9} />
-          {hasReply ? "Replied" : needsAttention ? "Urgent" : "Pending"}
+          {hasReply ? t("reviews.replied", "Replied") : needsAttention ? t("reviews.urgent", "Urgent") : t("reviews.pending", "Pending")}
         </span>
       </div>
     </button>
@@ -331,6 +334,7 @@ function ToggleRow({
 }
 
 export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) => void } = {}) => {
+  const { t, language } = useLanguage();
   const [integrations, setIntegrations] = useState<ReviewIntegrationsSummary | null>(null);
   const [studioTab, setStudioTab] = useState<StudioTab>("inbox");
   const [activeTab, setActiveTab] = useState<ReviewTab>("all");
@@ -482,7 +486,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
     }
   }, [filteredReviews, selectedReviewId]);
 
-  const sentiment = useMemo(() => computeSentiment(tabFiltered), [tabFiltered]);
+  const sentiment = useMemo(() => computeSentiment(tabFiltered, t), [tabFiltered, t]);
 
   const counts = useMemo(() => {
     const needsReply = tabFiltered.filter((r) => !r.reply?.content).length;
@@ -613,23 +617,23 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
   };
 
   const channelPills = [
-    { id: "all" as const, label: "All", count: tabFiltered.length },
+    { id: "all" as const, label: t("reviews.all", "All"), count: tabFiltered.length },
     {
       id: "google" as const,
-      label: "Google",
+      label: t("reviews.google", "Google"),
       count: tabFiltered.filter((r) => r.provider === "google").length,
     },
     {
       id: "meta" as const,
-      label: "Meta",
+      label: t("reviews.meta", "Meta"),
       count: tabFiltered.filter((r) => r.provider === "meta").length,
     },
   ];
 
   const statusPills = [
-    { id: "all" as const, label: "All", count: counts.total },
-    { id: "needs_reply" as const, label: "Pending", count: counts.needsReply },
-    { id: "replied" as const, label: "Replied", count: counts.replied },
+    { id: "all" as const, label: t("reviews.all", "All"), count: counts.total },
+    { id: "needs_reply" as const, label: t("reviews.pending", "Pending"), count: counts.needsReply },
+    { id: "replied" as const, label: t("reviews.repliedLabel", "Replied"), count: counts.replied },
   ];
 
   const handleGenerateDraft = (review: ReviewItemV1) => {
@@ -642,7 +646,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
       void runAutoReplyDryRun();
     } else {
       setExpandedReplyId(review.id);
-      setMessage("Manual reply works for all sources. AI drafts need Google Business connected.");
+      setMessage(t("reviews.manualReplyGoogleBusinessNeeded", "Manual reply works for all sources. AI drafts need Google Business connected."));
     }
   };
 
@@ -667,7 +671,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
             )}
           >
             <Inbox size={15} />
-            Review Inbox
+            {t("reviews.inbox", "Review Inbox")}
           </button>
           <button
             type="button"
@@ -680,7 +684,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
             )}
           >
             <BarChart3 size={15} />
-            Reputation Insights
+            {t("reviews.insights", "Reputation Insights")}
           </button>
         </div>
       )}
@@ -693,13 +697,13 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
               <div className="max-w-xl space-y-2.5">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-500/35 bg-teal-500/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-teal-400 ring-1 ring-teal-400/20">
                   <Sparkles size={11} className="text-teal-300" />
-                  Reputation Studio
+                  {t("reviews.reputationStudio", "Reputation Studio")}
                 </span>
                 <h2 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">
-                  Patient Review Hub
+                  {t("reviews.patientReviewHub", "Patient Review Hub")}
                 </h2>
                 <p className="text-xs font-medium leading-relaxed text-slate-400 sm:text-sm">
-                  Connect Google Business and Facebook to sync reviews, draft AI replies, and publish responses from one workspace.
+                  {t("reviews.connectPrompt", "Connect Google Business and Facebook to sync reviews, draft AI replies, and publish responses from one workspace.")}
                 </p>
               </div>
               <div className="flex h-16 w-16 shrink-0 items-center justify-center self-start rounded-2xl border border-white/10 bg-white/5 text-white shadow-inner backdrop-blur-md md:self-center">
@@ -720,9 +724,9 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                 <BookA size={26} className="text-indigo-600" />
               </div>
             </div>
-            <h3 className="text-lg font-extrabold text-slate-900">Connect review channels</h3>
+            <h3 className="text-lg font-extrabold text-slate-900">{t("reviews.connectChannelsTitle", "Connect review channels")}</h3>
             <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-              Open Integrations to link Google Maps and Facebook Pages, then return here to manage feedback.
+              {t("reviews.connectChannelsDesc", "Open Integrations to link Google Maps and Facebook Pages, then return here to manage feedback.")}
             </p>
             {onNavigate && (
               <button
@@ -730,7 +734,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                 onClick={() => onNavigate("integrations")}
                 className={cn(btnPrimary, "mt-6 group")}
               >
-                Open Integrations
+                {t("reviews.openIntegrationsBtn", "Open Integrations")}
                 <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
               </button>
             )}
@@ -746,38 +750,38 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-extrabold uppercase tracking-widest text-teal-600">
-                      Patient sentiment
+                      {t("reviews.sentiment", "Patient sentiment")}
                     </p>
                     <h3 className="mt-1 text-xl font-black capitalize text-slate-900">{sentiment.label}</h3>
                     <p className="mt-1 text-sm text-slate-500">
                       {sentiment.counts.total === 0
-                        ? "No reviews in current channel view"
-                        : `From ${sentiment.counts.total} synced review${sentiment.counts.total === 1 ? "" : "s"}`}
+                        ? t("reviews.noReviewsInChannel", "No reviews in current channel view")
+                        : t("reviews.syncedReviewsCount", `From ${sentiment.counts.total} synced reviews`).replace("{count}", String(sentiment.counts.total))}
                     </p>
                   </div>
                   {sentiment.counts.total > 0 && (
                     <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-800 ring-1 ring-teal-200/70">
-                      {sentiment.positive}% positive
+                      {t("reviews.positivePercentage", `${sentiment.positive}% positive`).replace("{pct}", String(sentiment.positive))}
                     </span>
                   )}
                 </div>
                 {sentiment.counts.total === 0 ? (
                   <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-8 text-center text-sm text-slate-500">
-                    Sync reviews to see sentiment breakdown.
+                    {t("reviews.syncToSeeSentiment", "Sync reviews to see sentiment breakdown.")}
                   </p>
                 ) : (
                   <div className="space-y-4">
-                    <SentimentMeter label="Positive (4â€“5 stars)" pct={sentiment.positive} count={sentiment.counts.positive} barClass="bg-emerald-500" />
-                    <SentimentMeter label="Neutral (3 stars)" pct={sentiment.neutral} count={sentiment.counts.neutral} barClass="bg-amber-400" />
-                    <SentimentMeter label="Negative (1â€“2 stars)" pct={sentiment.negative} count={sentiment.counts.negative} barClass="bg-rose-500" />
+                    <SentimentMeter label={t("reviews.positiveMeter", "Positive (4–5 stars)")} pct={sentiment.positive} count={sentiment.counts.positive} barClass="bg-emerald-500" />
+                    <SentimentMeter label={t("reviews.neutralMeter", "Neutral (3 stars)")} pct={sentiment.neutral} count={sentiment.counts.neutral} barClass="bg-amber-400" />
+                    <SentimentMeter label={t("reviews.negativeMeter", "Negative (1–2 stars)")} pct={sentiment.negative} count={sentiment.counts.negative} barClass="bg-rose-500" />
                   </div>
                 )}
               </div>
               <div className={cn(panelClass, "flex flex-col justify-between p-6")}>
                 <div>
-                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Trust score</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">{t("reviews.trustScore", "Trust score")}</p>
                   <p className="mt-2 text-5xl font-black tabular-nums text-slate-900">
-                    {trustScore > 0 ? trustScore.toFixed(1) : "â€”"}
+                    {trustScore > 0 ? trustScore.toFixed(1) : "—"}
                     <span className="ml-1 text-2xl font-semibold text-slate-400">/ 5</span>
                   </p>
                   <div className="mt-3">
@@ -786,19 +790,19 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                 </div>
                 <div className="mt-6 space-y-2 border-t border-slate-100 pt-4 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Total reviews</span>
+                    <span className="text-slate-500">{t("reviews.totalReviewsLabel", "Total reviews")}</span>
                     <span className="font-bold tabular-nums text-slate-800">{totalReviewCount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Pending reply</span>
+                    <span className="text-slate-500">{t("reviews.pendingReplyLabel", "Pending reply")}</span>
                     <span className="font-bold tabular-nums text-amber-700">{counts.needsReply}</span>
                   </div>
                 </div>
               </div>
               <div className={cn(panelClass, "space-y-4 p-5 lg:col-span-3")}>
-                <h4 className="text-sm font-black uppercase tracking-wide text-slate-800">Connected channels</h4>
-                <PlatformRow name="Google Business" active={integrations?.google_business?.configured} icon={<Globe size={16} className="text-blue-600" />} iconBg="bg-blue-500/10 ring-1 ring-blue-200/60" onSettings={onNavigate ? () => onNavigate("integrations") : undefined} />
-                <PlatformRow name="Facebook Page" active={integrations?.meta_facebook?.configured} icon={<BookA size={16} className="text-indigo-600" />} iconBg="bg-indigo-500/10 ring-1 ring-indigo-200/60" onSettings={onNavigate ? () => onNavigate("integrations") : undefined} />
+                <h4 className="text-sm font-black uppercase tracking-wide text-slate-800">{t("reviews.connectedChannels", "Connected channels")}</h4>
+                <PlatformRow name={t("reviews.googleBusiness", "Google Business")} active={integrations?.google_business?.configured} icon={<Globe size={16} className="text-blue-600" />} iconBg="bg-blue-500/10 ring-1 ring-blue-200/60" onSettings={onNavigate ? () => onNavigate("integrations") : undefined} />
+                <PlatformRow name={t("reviews.facebookPage", "Facebook Page")} active={integrations?.meta_facebook?.configured} icon={<BookA size={16} className="text-indigo-600" />} iconBg="bg-indigo-500/10 ring-1 ring-indigo-200/60" onSettings={onNavigate ? () => onNavigate("integrations") : undefined} />
               </div>
             </div>
           ) : (
@@ -809,11 +813,11 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                   <div className="max-w-xl space-y-2.5">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-500/35 bg-teal-500/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-teal-400">
                       <Sparkles size={11} className="text-teal-300" />
-                      AI Reply Studio
+                      {t("reviews.aiReplyStudio", "AI Reply Studio")}
                     </span>
-                    <h2 className="text-2xl font-black tracking-tight text-white sm:text-3xl">Review Inbox</h2>
+                    <h2 className="text-2xl font-black tracking-tight text-white sm:text-3xl">{t("reviews.inbox", "Review Inbox")}</h2>
                     <p className="text-xs font-medium leading-relaxed text-slate-400 sm:text-sm">
-                      Search patient feedback, generate bulk AI drafts, and publish replies to Google and Facebook.
+                      {t("reviews.inboxSub", "Search patient feedback, generate bulk AI drafts, and publish replies to Google and Facebook.")}
                     </p>
                   </div>
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-inner backdrop-blur-md">
@@ -827,9 +831,9 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                   <div>
                     <h3 className="flex items-center gap-2 text-base font-bold text-slate-800">
                       <Search className="text-teal-600" size={18} />
-                      Find a review
+                      {t("reviews.findReview", "Find a review")}
                     </h3>
-                    <p className="mt-0.5 text-xs font-medium text-slate-500">Search by patient name or review text</p>
+                    <p className="mt-0.5 text-xs font-medium text-slate-500">{t("reviews.findReviewSub", "Search by patient name or review text")}</p>
                   </div>
                   <div className="flex flex-col gap-3 md:flex-row">
                     <div className="relative min-w-0 flex-1">
@@ -838,7 +842,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                         type="search"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Patient name or keywordsâ€¦"
+                        placeholder={t("reviews.searchPlaceholder", "Patient name or keywords...")}
                         className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-4 text-sm font-medium outline-none transition-all placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
                       />
                     </div>
@@ -850,7 +854,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                         className="btn-shine inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-600/25 transition hover:bg-teal-700 disabled:opacity-50"
                       >
                         {autoReplyLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                        Bulk AI Drafts
+                        {t("reviews.bulkDraftsBtn", "Bulk AI Drafts")}
                       </button>
                     )}
                     <button
@@ -860,12 +864,12 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                       className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:border-teal-200 hover:text-teal-700 disabled:opacity-50"
                     >
                       <RefreshCcw size={16} className={cn(reviewsLoading && "animate-spin")} />
-                      Sync
+                      {t("reviews.syncBtn", "Sync")}
                     </button>
                   </div>
                   {(searchQuery || activeTab !== "all" || replyFilter !== "all") && (
                     <button type="button" onClick={resetFilters} className="text-xs font-bold text-teal-700 hover:text-teal-800">
-                      Reset filters
+                      {t("reviews.resetFilters", "Reset filters")}
                     </button>
                   )}
                 </div>
@@ -875,8 +879,10 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                 <aside className="space-y-4 lg:sticky lg:top-6 lg:col-span-4 lg:self-start">
                   <div className="flex items-center justify-between px-1">
                     <div>
-                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-800">Inbox</h3>
-                      <p className="mt-0.5 text-[11px] font-semibold text-slate-400">{filteredReviews.length} matching</p>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-800">{t("reviews.inbox", "Inbox")}</h3>
+                      <p className="mt-0.5 text-[11px] font-semibold text-slate-400">
+                        {t("reviews.matchingCount", `${filteredReviews.length} matching`).replace("{count}", String(filteredReviews.length))}
+                      </p>
                     </div>
                   </div>
 
@@ -916,12 +922,12 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                     {reviewsLoading ? (
                       <div className="flex flex-col items-center justify-center gap-2 py-16">
                         <Loader2 className="animate-spin text-teal-500" size={24} />
-                        <p className="text-xs text-slate-400">Loading reviewsâ€¦</p>
+                        <p className="text-xs text-slate-400">{t("reviews.loadingReviews", "Loading reviews...")}</p>
                       </div>
                     ) : filteredReviews.length === 0 ? (
                       <div className="space-y-2 py-16 text-center">
                         <MessageSquare size={28} className="mx-auto text-slate-300" />
-                        <p className="text-xs font-medium text-slate-400">No reviews match filters.</p>
+                        <p className="text-xs font-medium text-slate-400">{t("reviews.noReviewsMatchFilters", "No reviews match filters.")}</p>
                       </div>
                     ) : (
                       filteredReviews.map((review) => (
@@ -939,11 +945,11 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                   <div className={cn(panelClass, "space-y-3 p-4")}>
                     <div className="flex items-center gap-2">
                       <Bot size={18} className="text-teal-600" />
-                      <p className="text-xs font-black text-slate-800">Auto-reply rules</p>
+                      <p className="text-xs font-black text-slate-800">{t("reviews.autoReplyRules", "Auto-reply rules")}</p>
                     </div>
-                    <ToggleRow label="Auto-draft 5-star" checked={autoSettings.fiveStar} onChange={(fiveStar) => persistAutoSettings({ ...autoSettings, fiveStar })} />
-                    <ToggleRow label="Draft neutral (3â˜…)" checked={autoSettings.neutralDraft} onChange={(neutralDraft) => persistAutoSettings({ ...autoSettings, neutralDraft })} />
-                    <ToggleRow label="Flag low ratings" checked={autoSettings.flagComplaints} onChange={(flagComplaints) => persistAutoSettings({ ...autoSettings, flagComplaints })} />
+                    <ToggleRow label={t("reviews.autoDraft5Star", "Auto-draft 5-star")} checked={autoSettings.fiveStar} onChange={(fiveStar) => persistAutoSettings({ ...autoSettings, fiveStar })} />
+                    <ToggleRow label={t("reviews.draftNeutral3", "Draft neutral (3★)")} checked={autoSettings.neutralDraft} onChange={(neutralDraft) => persistAutoSettings({ ...autoSettings, neutralDraft })} />
+                    <ToggleRow label={t("reviews.flagLowRatings", "Flag low ratings")} checked={autoSettings.flagComplaints} onChange={(flagComplaints) => persistAutoSettings({ ...autoSettings, flagComplaints })} />
                     <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100/80 p-1">
                       {(["empathetic", "professional"] as const).map((style) => (
                         <button
@@ -955,7 +961,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                             autoSettings.style === style ? "bg-white text-teal-700 shadow-sm" : "text-slate-500"
                           )}
                         >
-                          {style}
+                          {style === "empathetic" ? t("reviews.styleEmpathetic", "Empathetic") : t("reviews.styleProfessional", "Professional")}
                         </button>
                       ))}
                     </div>
@@ -963,7 +969,7 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
 
                   {counts.needsReply > 0 && (
                     <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-3 text-xs font-bold text-amber-800">
-                      {counts.needsReply} pending {counts.needsReply === 1 ? "reply" : "replies"}
+                      {counts.needsReply} {counts.needsReply === 1 ? t("reviews.pendingReplyAlert", "pending reply") : t("reviews.pendingRepliesAlert", "pending replies")}
                     </div>
                   )}
                 </aside>
@@ -972,8 +978,8 @@ export const PatientReviews = ({ onNavigate }: { onNavigate?: (section: string) 
                   {!selectedReview ? (
                     <div className={cn(panelClass, "flex flex-col items-center bg-white/40 py-24 text-center")}>
                       <MessageSquare size={48} className="text-slate-300" />
-                      <p className="mt-4 text-sm font-bold text-slate-500">Select a review to respond</p>
-                      <p className="mt-1 text-xs text-slate-400">Choose from the inbox or sync new reviews</p>
+                      <p className="mt-4 text-sm font-bold text-slate-505">{t("reviews.selectReview", "Select a review to respond")}</p>
+                      <p className="mt-1 text-xs text-slate-400">{t("reviews.chooseFromInbox", "Choose from the inbox or sync new reviews")}</p>
                     </div>
                   ) : (
                     <ReviewCard
@@ -1078,6 +1084,7 @@ function ReviewCard({
   onRejectDraft: () => void;
   onGenerateDraft: () => void;
 }) {
+  const { t, language } = useLanguage();
   const provider = review.provider === "meta" ? PROVIDER.meta : PROVIDER.google;
   const ProviderIcon = provider.icon;
   const name = authorName(review.author);
@@ -1168,7 +1175,13 @@ function ReviewCard({
             badge.className
           )}
         >
-          {badge.text}
+          {badge.text === "Replied"
+            ? t("reviews.replied", "Replied")
+            : badge.text === "New Feedback"
+              ? t("reviews.newFeedback", "New Feedback")
+              : badge.text === "Neutral Rating"
+                ? t("reviews.neutralRating", "Neutral Rating")
+                : t("reviews.criticalAction", "Critical Action")}
         </span>
       </div>
 
@@ -1176,7 +1189,7 @@ function ReviewCard({
       <div className="relative pl-3 border-l-2 border-slate-150/80 group-hover:border-teal-500/40 transition-colors duration-300">
         <p className="text-sm leading-relaxed text-slate-700 font-medium select-text">
           {review.content || (
-            <span className="text-slate-400 italic">No description text provided by user.</span>
+            <span className="text-slate-400 italic">{t("reviews.noContent", "No description text provided by user.")}</span>
           )}
         </p>
       </div>
@@ -1193,7 +1206,7 @@ function ReviewCard({
           />
           <div className="flex items-center gap-1.5 relative z-10">
             <Bot size={13} className="text-teal-650" />
-            <p className="text-[10px] font-extrabold tracking-wider text-teal-700/90 uppercase">Published Reply</p>
+            <p className="text-[10px] font-extrabold tracking-wider text-teal-700/90 uppercase">{t("reviews.publishedReply", "Published Reply")}</p>
           </div>
           <p className="mt-2 text-xs leading-relaxed text-slate-650 font-medium relative z-10 pl-5">
             {review.reply.content}
@@ -1216,11 +1229,11 @@ function ReviewCard({
               <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-teal-600 text-white shadow-sm">
                 <Sparkles size={11} />
               </span>
-              AI reply suggestion
+              {t("reviews.aiReplySuggestion", "AI reply suggestion")}
             </div>
             
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[9px] font-extrabold border border-emerald-200">
-              98% Confidence Match
+              {t("reviews.confidenceMatch", "98% Confidence Match")}
             </span>
           </div>
 
@@ -1236,7 +1249,7 @@ function ReviewCard({
               className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 px-3.5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-teal-700 active:scale-95 disabled:opacity-50 cursor-pointer btn-shine"
             >
               {isReplying ? <Loader2 size={12} className="animate-spin" /> : <Send size={11} />}
-              Approve & Post Live
+              {t("reviews.approvePost", "Approve & Post Live")}
             </button>
             <button
               type="button"
@@ -1246,14 +1259,14 @@ function ReviewCard({
               }}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 active:scale-95 cursor-pointer"
             >
-              Edit suggestion
+              {t("reviews.editSuggestion", "Edit suggestion")}
             </button>
             <button
               type="button"
               onClick={onRejectDraft}
               className="inline-flex items-center justify-center rounded-xl px-3 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-750 cursor-pointer"
             >
-              Dismiss
+              {t("reviews.dismiss", "Dismiss")}
             </button>
           </div>
         </div>
@@ -1264,9 +1277,9 @@ function ReviewCard({
           {editing ? (
             <div className="space-y-3.5 rounded-2xl border border-slate-205 bg-slate-50/50 p-4">
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Write Response</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{t("reviews.writeResponse", "Write Response")}</label>
                 <span className="text-[9px] font-bold text-slate-450 font-mono">
-                  {replyDraft.length} characters
+                  {t("reviews.charactersCount", "{count} characters").replace("{count}", String(replyDraft.length))}
                 </span>
               </div>
               <textarea
@@ -1274,7 +1287,7 @@ function ReviewCard({
                 onChange={(e) => onDraftChange(e.target.value)}
                 rows={3}
                 autoFocus
-                placeholder="Type your clinical patient reply..."
+                placeholder={t("reviews.typeReply", "Type your clinical patient reply...")}
                 className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs text-slate-800 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 font-medium shadow-2xs"
               />
               <div className="flex flex-wrap justify-end gap-2">
@@ -1283,7 +1296,7 @@ function ReviewCard({
                   onClick={onToggleReply}
                   className="inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-xs font-bold text-slate-505 hover:bg-slate-100 cursor-pointer"
                 >
-                  Cancel
+                  {t("generic.cancel", "Cancel")}
                 </button>
                 <button
                   type="button"
@@ -1292,7 +1305,7 @@ function ReviewCard({
                   className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-650 px-4.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-teal-750 active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   {isReplying ? <Loader2 size={12} className="animate-spin" /> : <Send size={11} />}
-                  Publish Reply
+                  {t("reviews.publishReply", "Publish Reply")}
                 </button>
               </div>
             </div>
@@ -1304,14 +1317,14 @@ function ReviewCard({
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 active:scale-95 cursor-pointer"
               >
                 <Sparkles size={12} className="text-teal-605" />
-                AI Draft Suggestion
+                {t("reviews.aiDraftSuggestion", "AI Draft Suggestion")}
               </button>
               <button
                 type="button"
                 onClick={onToggleReply}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-650 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-teal-750 active:scale-95 cursor-pointer btn-shine"
               >
-                Reply Manual
+                {t("reviews.replyManual", "Reply Manual")}
               </button>
             </div>
           )}

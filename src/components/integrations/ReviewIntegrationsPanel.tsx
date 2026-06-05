@@ -10,18 +10,19 @@ import {
   type ReviewIntegrationsSummary,
   type ReviewProviderStatus,
 } from "@/lib/api";
+import { useLanguage } from "@/lib/LanguageContext";
 import { cn } from "@/lib/utils";
 
 const panel = "dash-glass rounded-3xl border border-slate-200/50 shadow-sm";
 
-function ReviewStatusPill({ status }: { status: ReviewProviderStatus }) {
+function ReviewStatusPill({ status, t }: { status: ReviewProviderStatus; t: (k: string, d: string) => string }) {
   const ready = status.configured;
   const needsConfig = status.connected && !status.configured;
   if (ready) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-500/20 shadow-sm shadow-emerald-500/5">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-        Ready
+        {t("integrations.statusReady", "Ready")}
       </span>
     );
   }
@@ -29,20 +30,20 @@ function ReviewStatusPill({ status }: { status: ReviewProviderStatus }) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-800 ring-1 ring-amber-500/20 shadow-sm shadow-amber-500/5">
         <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-        Pick location
+        {t("integrations.statusPickLocation", "Pick location")}
       </span>
     );
   }
   if (status.connected) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100/80 px-3 py-1 text-[11px] font-bold text-slate-650 ring-1 ring-slate-200/50">
-        Connected
+        {t("integrations.statusConnected", "Connected")}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-slate-100/80 px-2.5 py-1 text-[11px] font-bold text-slate-400 ring-1 ring-slate-200/50">
-      Not connected
+      {t("integrations.statusNotConnected", "Not connected")}
     </span>
   );
 }
@@ -55,6 +56,7 @@ function ProviderConnectCard({
   onDisconnect,
   busy,
   accent,
+  t,
 }: {
   title: string;
   description: string;
@@ -63,6 +65,7 @@ function ProviderConnectCard({
   onDisconnect: () => void;
   busy: boolean;
   accent: "red" | "blue";
+  t: (k: string, d: string) => string;
 }) {
   const brandGlow =
     accent === "red"
@@ -92,7 +95,7 @@ function ProviderConnectCard({
           <div className="min-w-0 flex-1 space-y-1.5 text-left">
             <div className="flex flex-wrap items-center gap-2.5">
               <h3 className="font-extrabold text-[16px] text-slate-805">{title}</h3>
-              <ReviewStatusPill status={status} />
+              <ReviewStatusPill status={status} t={t} />
             </div>
             <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">{description}</p>
             {status.email && (
@@ -118,7 +121,7 @@ function ProviderConnectCard({
               className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-650 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 active:scale-95 disabled:opacity-50 shadow-sm"
             >
               <Unlink2 size={14} />
-              Disconnect
+              {t("integrations.disconnect", "Disconnect")}
             </button>
           ) : (
             <button
@@ -131,7 +134,7 @@ function ProviderConnectCard({
               )}
             >
               <Link2 size={14} />
-              Connect
+              {t("integrations.connect", "Connect")}
             </button>
           )}
         </div>
@@ -142,6 +145,7 @@ function ProviderConnectCard({
 
 /** Google Business + Facebook — grid cells inside IntegrationsSettings. */
 export const ReviewIntegrationsPanel = () => {
+  const { t } = useLanguage();
   const [integrations, setIntegrations] = useState<ReviewIntegrationsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [googleLocations, setGoogleLocations] = useState<GoogleBusinessLocation[]>([]);
@@ -163,7 +167,7 @@ export const ReviewIntegrationsPanel = () => {
       const data = await reviewIntegrationsApi.getIntegrations();
       setIntegrations(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not load review connections.");
+      setError(err instanceof Error ? err.message : t("integrations.loadError", "Could not load review connections."));
     } finally {
       setLoading(false);
     }
@@ -178,7 +182,7 @@ export const ReviewIntegrationsPanel = () => {
         setSelectedLocationId(data.locations[0].location_id);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not load locations.");
+      setError(err instanceof Error ? err.message : t("integrations.locationsError", "Could not load locations."));
     }
   };
 
@@ -189,10 +193,10 @@ export const ReviewIntegrationsPanel = () => {
       setMetaPages(pages);
       if (pages.length === 1) setSelectedPageId(pages[0].id);
       if (pages.length === 0) {
-        setError("No Facebook pages found. Try connecting again.");
+        setError(t("integrations.noPagesFound", "No Facebook pages found. Try connecting again."));
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not load pages.");
+      setError(err instanceof Error ? err.message : t("integrations.pagesError", "Could not load pages."));
     }
   };
 
@@ -212,18 +216,18 @@ export const ReviewIntegrationsPanel = () => {
     const onMessage = async (event: MessageEvent) => {
       const { type, needs_page_select } = event.data || {};
       if (type === "GOOGLE_BUSINESS_CONNECTED") {
-        setMessage("Connected — choose your clinic location below.");
+        setMessage(t("integrations.googleBusinessConnected", "Connected — choose your clinic location below."));
         setError(null);
         await refreshIntegrations();
         await loadGoogleLocations();
       }
       if (type === "META_REVIEWS_CONNECTED") {
-        setMessage("Facebook connected.");
+        setMessage(t("integrations.metaConnected", "Facebook connected."));
         setError(null);
         await refreshIntegrations();
       }
       if (type === "META_REVIEWS_PAGES_READY" || needs_page_select) {
-        setMessage("Select your Facebook Page below.");
+        setMessage(t("integrations.metaPagesReady", "Select your Facebook Page below."));
         setError(null);
         await refreshIntegrations();
         await loadMetaPages();
@@ -259,11 +263,11 @@ export const ReviewIntegrationsPanel = () => {
     setError(null);
     try {
       await reviewIntegrationsApi.saveGoogleConfig(selectedAccountId, selectedLocationId);
-      setMessage("Clinic location saved.");
+      setMessage(t("integrations.locationSaved", "Clinic location saved."));
       setGoogleLocations([]);
       await refreshIntegrations();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not save location.");
+      setError(err instanceof Error ? err.message : t("integrations.locationSaveError", "Could not save location."));
     } finally {
       setConfigSaving(false);
     }
@@ -275,12 +279,12 @@ export const ReviewIntegrationsPanel = () => {
     setConfigSaving(true);
     setError(null);
     try {
-      await reviewIntegrationsApi.saveMetaConfig(selectedPageId, page?.name || "Facebook Page");
-      setMessage("Facebook Page saved.");
+      await reviewIntegrationsApi.saveMetaConfig(selectedPageId, page?.name || t("integrations.facebookPage", "Facebook Page"));
+      setMessage(t("integrations.pageSaved", "Facebook Page saved."));
       setMetaPages([]);
       await refreshIntegrations();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not save page.");
+      setError(err instanceof Error ? err.message : t("integrations.pageSaveError", "Could not save page."));
     } finally {
       setConfigSaving(false);
     }
@@ -296,55 +300,57 @@ export const ReviewIntegrationsPanel = () => {
 
       {google && (
         <ProviderConnectCard
-          title="Google Business"
-          description="Import and reply to Google reviews."
+          title={t("integrations.googleBusiness", "Google Business")}
+          description={t("integrations.googleBusinessDesc", "Import and reply to Google reviews.")}
           status={google}
           onConnect={connectGoogle}
           onDisconnect={async () => {
             setBusy(true);
             try {
               await reviewIntegrationsApi.disconnectGoogle();
-              setMessage("Google Business disconnected.");
+              setMessage(t("integrations.googleDisconnected", "Google Business disconnected."));
               await refreshIntegrations();
             } catch (err: unknown) {
-              setError(err instanceof Error ? err.message : "Disconnect failed.");
+              setError(err instanceof Error ? err.message : t("integrations.disconnectError", "Disconnect failed."));
             } finally {
               setBusy(false);
             }
           }}
           busy={busy || loading}
           accent="red"
+          t={t}
         />
       )}
 
       {meta && (
         <ProviderConnectCard
-          title="Facebook Page"
-          description="Import and reply to Facebook reviews."
+          title={t("integrations.facebookPage", "Facebook Page")}
+          description={t("integrations.facebookPageDesc", "Import and reply to Facebook reviews.")}
           status={meta}
           onConnect={connectMeta}
           onDisconnect={async () => {
             setBusy(true);
             try {
               await reviewIntegrationsApi.disconnectMeta();
-              setMessage("Facebook disconnected.");
+              setMessage(t("integrations.facebookDisconnected", "Facebook disconnected."));
               await refreshIntegrations();
             } catch (err: unknown) {
-              setError(err instanceof Error ? err.message : "Disconnect failed.");
+              setError(err instanceof Error ? err.message : t("integrations.disconnectError", "Disconnect failed."));
             } finally {
               setBusy(false);
             }
           }}
           busy={busy || loading}
           accent="blue"
+          t={t}
         />
       )}
 
       {google?.connected && !google.configured && (
         <div className={cn(panel, "space-y-4 p-6 sm:col-span-2 relative overflow-hidden text-left bg-white/60 shadow-lg animate-fadeIn")}>
           <div className="absolute top-0 right-0 w-24 h-24 bg-teal-500/5 rounded-full blur-2xl pointer-events-none" />
-          <h4 className="text-sm font-extrabold text-slate-800">Choose Google Business location</h4>
-          <p className="text-xs text-slate-500 font-medium">Select the clinic location matching this Google Account details to sync reviews.</p>
+          <h4 className="text-sm font-extrabold text-slate-800">{t("integrations.chooseGoogleLocation", "Choose Google Business location")}</h4>
+          <p className="text-xs text-slate-500 font-medium">{t("integrations.chooseGoogleLocationDesc", "Select the clinic location matching this Google Account details to sync reviews.")}</p>
           {googleLocations.length === 0 ? (
             <button
               type="button"
@@ -352,12 +358,12 @@ export const ReviewIntegrationsPanel = () => {
               className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2 text-xs font-bold text-teal-700 transition hover:bg-teal-100/80 active:scale-95 shadow-sm"
             >
               <RefreshCcw size={12} />
-              Load locations
+              {t("integrations.loadLocations", "Load locations")}
             </button>
           ) : (
             <div className="flex flex-col gap-3.5 sm:flex-row sm:items-end">
               <div className="min-w-[200px] flex-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Location</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">{t("integrations.location", "Location")}</label>
                 <select
                   value={selectedLocationId}
                   onChange={(e) => {
@@ -367,7 +373,7 @@ export const ReviewIntegrationsPanel = () => {
                   }}
                   className="w-full rounded-2xl border border-slate-200 bg-white/65 px-4 py-2.5 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 font-medium"
                 >
-                  <option value="">Select location…</option>
+                  <option value="">{t("integrations.selectLocation", "Select location…")}</option>
                   {googleLocations.map((loc) => (
                     <option key={loc.location_id} value={loc.location_id}>
                       {loc.title || loc.location_id}
@@ -382,7 +388,7 @@ export const ReviewIntegrationsPanel = () => {
                 className="btn-shine h-[42px] inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-5 text-xs font-bold text-white shadow-md shadow-teal-650/20 transition hover:bg-teal-700 active:scale-95 disabled:opacity-50"
               >
                 {configSaving ? <Loader2 size={13} className="animate-spin" /> : null}
-                {configSaving ? "Saving…" : "Save Location"}
+                {configSaving ? t("generic.saving", "Saving…") : t("integrations.saveLocation", "Save Location")}
               </button>
             </div>
           )}
@@ -392,8 +398,8 @@ export const ReviewIntegrationsPanel = () => {
       {meta?.connected && !meta.configured && (
         <div className={cn(panel, "space-y-4 p-6 sm:col-span-2 relative overflow-hidden text-left bg-white/60 shadow-lg animate-fadeIn")}>
           <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
-          <h4 className="text-sm font-extrabold text-slate-805">Choose Facebook Page</h4>
-          <p className="text-xs text-slate-500 font-medium">Select the clinic facebook page matching this Meta Account details to sync reviews.</p>
+          <h4 className="text-sm font-extrabold text-slate-805">{t("integrations.chooseFacebookPage", "Choose Facebook Page")}</h4>
+          <p className="text-xs text-slate-500 font-medium">{t("integrations.chooseFacebookPageDesc", "Select the clinic facebook page matching this Meta Account details to sync reviews.")}</p>
           {metaPages.length === 0 ? (
             <div className="flex flex-wrap gap-2.5">
               <button
@@ -402,26 +408,26 @@ export const ReviewIntegrationsPanel = () => {
                 className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 transition hover:bg-blue-100/80 active:scale-95 shadow-sm"
               >
                 <RefreshCcw size={12} />
-                Load pages
+                {t("integrations.loadPages", "Load pages")}
               </button>
               <button
                 type="button"
                 onClick={connectMeta}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-650 transition hover:bg-slate-50 active:scale-95 shadow-sm"
               >
-                Reconnect
+                {t("integrations.reconnect", "Reconnect")}
               </button>
             </div>
           ) : (
             <div className="flex flex-col gap-3.5 sm:flex-row sm:items-end">
               <div className="min-w-[200px] flex-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Page</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">{t("integrations.page", "Page")}</label>
                 <select
                   value={selectedPageId}
                   onChange={(e) => setSelectedPageId(e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 bg-white/65 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 font-medium"
                 >
-                  <option value="">Select page…</option>
+                  <option value="">{t("integrations.selectPage", "Select page…")}</option>
                   {metaPages.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -436,7 +442,7 @@ export const ReviewIntegrationsPanel = () => {
                 className="btn-shine h-[42px] inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-650 px-5 text-xs font-bold text-white shadow-md shadow-teal-650/20 transition hover:bg-teal-700 active:scale-95 disabled:opacity-50"
               >
                 {configSaving ? <Loader2 size={13} className="animate-spin" /> : null}
-                {configSaving ? "Saving…" : "Save Page"}
+                {configSaving ? t("generic.saving", "Saving…") : t("integrations.savePage", "Save Page")}
               </button>
             </div>
           )}

@@ -16,17 +16,19 @@ import {
 } from "lucide-react";
 import { authApi, setAuthSession } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { useLanguage, type Language } from "@/lib/LanguageContext";
 
 /* ── brand features shown on left panel ── */
 const features = [
-  "Secure end-to-end encrypted health data",
-  "Connect with 45+ certified specialists",
-  "AI-powered health insights & reports",
-  "One-click appointment booking",
+  { key: "auth.feature1", def: "Secure end-to-end encrypted health data" },
+  { key: "auth.feature2", def: "Connect with 45+ certified specialists" },
+  { key: "auth.feature3", def: "AI-powered health insights & reports" },
+  { key: "auth.feature4", def: "One-click appointment booking" },
 ];
 
 export default function AuthPage() {
   const router = useRouter();
+  const { language, setLanguage, t } = useLanguage();
   const [checkingSession, setCheckingSession] = useState(true);
 
   const [isLogin, setIsLogin] = useState(true);
@@ -119,21 +121,21 @@ export default function AuthPage() {
         <div className="relative z-10 space-y-8">
           <div>
             <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-teal-300">
-              Healthcare Platform
+              {t("auth.healthcarePlatform", "Healthcare Platform")}
             </p>
             <h2 className="text-4xl font-extrabold leading-tight xl:text-5xl">
-              Your health journey,<br />powered by <span className="text-teal-300">AI</span>
+              {t("auth.leftTitle", "Your health journey, powered by AI")}
             </h2>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-teal-100">
-              Join thousands of clinics who trust ClinicSuite for smarter, faster, and more personal patient care.
+              {t("auth.leftSubtitle", "Join thousands of clinics who trust ClinicSuite for smarter, faster, and more personal patient care.")}
             </p>
           </div>
 
           <ul className="space-y-3">
             {features.map((f) => (
-              <li key={f} className="flex items-start gap-3 text-sm text-teal-50">
+              <li key={f.key} className="flex items-start gap-3 text-sm text-teal-50">
                 <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-teal-300" />
-                {f}
+                {t(f.key, f.def)}
               </li>
             ))}
           </ul>
@@ -141,7 +143,7 @@ export default function AuthPage() {
           {/* testimonial */}
           <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
             <p className="text-sm leading-relaxed text-teal-50">
-              &ldquo;ClinicSuite changed how I manage my clinic. Bookings and patient follow-ups are fully automated now.&rdquo;
+              &ldquo;{t("auth.leftQuote", "ClinicSuite changed how I manage my clinic. Bookings and patient follow-ups are fully automated now.")}&rdquo;
             </p>
             <div className="mt-3 flex items-center gap-3">
               <img
@@ -151,7 +153,7 @@ export default function AuthPage() {
               />
               <div>
                 <p className="text-sm font-bold">Dr. Arjun Mehta</p>
-                <p className="text-xs text-teal-300">Cardiologist, Apollo Group</p>
+                <p className="text-xs text-teal-300">{t("auth.leftRole", "Cardiologist, Apollo Group")}</p>
               </div>
             </div>
           </div>
@@ -159,7 +161,7 @@ export default function AuthPage() {
 
         {/* bottom note */}
         <p className="relative z-10 text-xs text-teal-400">
-          © 2026 ClinicSuite. All rights reserved.
+          {t("landing.footer.copyright", "© 2026 ClinicSuite. All rights reserved.")}
         </p>
       </div>
 
@@ -167,13 +169,28 @@ export default function AuthPage() {
           RIGHT PANEL — form
       ══════════════════════════════════════════ */}
       <div className="flex flex-1 flex-col items-center justify-center px-5 py-12 sm:px-10">
-        {/* back to home */}
-        <a
-          href="/"
-          className="mb-8 flex items-center gap-1.5 self-start text-sm font-medium text-slate-500 transition hover:text-teal-600"
-        >
-          <ArrowLeft size={15} /> Back to Home
-        </a>
+        {/* back to home & language switcher */}
+        <div className="mb-8 flex w-full max-w-[420px] items-center justify-between">
+          <a
+            href="/"
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-teal-600"
+          >
+            <ArrowLeft size={15} /> {t("auth.backToHome", "Back to Home")}
+          </a>
+
+          {/* Language Selector Dropdown */}
+          <div className="relative">
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              className="cursor-pointer rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 outline-none hover:border-teal-300 hover:text-teal-600 shadow-sm"
+            >
+              <option value="en">🇬🇧 EN</option>
+              <option value="hi">🇮🇳 HI</option>
+              <option value="de">🇩🇪 DE</option>
+            </select>
+          </div>
+        </div>
 
         <div className="w-full max-w-[420px]">
           {/* mobile logo */}
@@ -182,12 +199,12 @@ export default function AuthPage() {
           {/* heading */}
           <div className="mb-8">
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-              {isLogin ? "Welcome back 👋" : "Create your account"}
+              {isLogin ? t("auth.welcomeBack", "Welcome back 👋") : t("auth.createAccount", "Create your account")}
             </h1>
             <p className="mt-2 text-sm text-slate-500">
               {isLogin
-                ? "Sign in to access your health dashboard"
-                : "Join ClinicSuite and automate your clinic"}
+                ? t("auth.signinSub", "Sign in to access your health dashboard")
+                : t("auth.signupSub", "Join ClinicSuite and automate your clinic")}
             </p>
           </div>
 
@@ -195,6 +212,7 @@ export default function AuthPage() {
           <div className="mb-8 flex rounded-2xl border border-slate-200 bg-slate-100 p-1">
             {(["Sign In", "Sign Up"] as const).map((label, i) => {
               const active = isLogin ? i === 0 : i === 1;
+              const translatedLabel = label === "Sign In" ? t("auth.signin", "Sign In") : t("auth.signup", "Sign Up");
               return (
                 <button
                   key={label}
@@ -205,7 +223,7 @@ export default function AuthPage() {
                       : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
-                  {label}
+                  {translatedLabel}
                 </button>
               );
             })}
@@ -217,7 +235,7 @@ export default function AuthPage() {
             {!isLogin && (
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Full Name
+                  {t("auth.fullName", "Full Name")}
                 </label>
                 <div className="relative">
                   <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -236,7 +254,7 @@ export default function AuthPage() {
             {/* email */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Email Address
+                {t("auth.email", "Email Address")}
               </label>
               <div className="relative">
                 <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -256,11 +274,11 @@ export default function AuthPage() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Password
+                  {t("auth.password", "Password")}
                 </label>
                 {isLogin && (
                   <button type="button" className="text-xs font-semibold text-teal-600 hover:text-teal-700">
-                    Forgot password?
+                    {t("auth.forgotPassword", "Forgot password?")}
                   </button>
                 )}
               </div>
@@ -307,9 +325,9 @@ export default function AuthPage() {
               {isLoading ? (
                 <Loader2 size={18} className="animate-spin" />
               ) : isLogin ? (
-                <><LogIn size={16} /> Sign In to Dashboard</>
+                <><LogIn size={16} /> {t("auth.signinButton", "Sign In to Dashboard")}</>
               ) : (
-                <><UserPlus size={16} /> Create My Account</>
+                <><UserPlus size={16} /> {t("auth.signupButton", "Create My Account")}</>
               )}
             </button>
           </form>
@@ -319,7 +337,7 @@ export default function AuthPage() {
             <>
               <div className="my-6 flex items-center gap-3">
                 <div className="h-px flex-1 bg-slate-200" />
-                <span className="text-xs font-semibold text-slate-400">OR CONTINUE WITH</span>
+                <span className="text-xs font-semibold text-slate-400">{t("auth.orContinue", "OR CONTINUE WITH")}</span>
                 <div className="h-px flex-1 bg-slate-200" />
               </div>
 
@@ -358,12 +376,12 @@ export default function AuthPage() {
 
           {/* switch mode */}
           <p className="mt-8 text-center text-sm text-slate-500">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+            {isLogin ? t("auth.dontHaveAccount", "Don't have an account?") : t("auth.alreadyHaveAccount", "Already have an account?")}{" "}
             <button
               onClick={switchMode}
               className="font-bold text-teal-600 transition hover:text-teal-700 hover:underline"
             >
-              {isLogin ? "Sign up free" : "Sign in"}
+              {isLogin ? t("auth.signupFree", "Sign up free") : t("auth.signinLink", "Sign in")}
             </button>
           </p>
         </div>
